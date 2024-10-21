@@ -1,10 +1,12 @@
 ﻿using System;
+using System.IO;
 using BTD_Mod_Helper.Api;
 using BTD_Mod_Helper.Api.Components;
 using BTD_Mod_Helper.Api.Enums;
 using Il2CppAssets.Scripts.Unity.UI_New.Main;
 using Il2CppAssets.Scripts.Unity.UI_New.Popups;
 using Il2CppTMPro;
+using MelonLoader.Utils;
 using StreamActions;
 using TwitchLib.Client;
 using TwitchLib.Client.Models;
@@ -31,7 +33,12 @@ public class Main : BloonsTD6Mod
 {
     internal static MelonLogger.Instance Logger;
 
+    public static string ModFolder = Path.Combine(MelonEnvironment.ModsDirectory, "StreamActions");
+    public static string CacheFolder = Path.Combine(ModFolder, "Cache");
+
     public static TwitchClient? client;
+
+    private const string TwitchUserName = "StreamActions";
 
     public override void OnInitialize()
     {
@@ -45,6 +52,17 @@ public class Main : BloonsTD6Mod
         MainMenuButton.Create(__instance);
     }
 
+    /// <inheritdoc />
+    public override void OnTitleScreen()
+    {
+        if (Settings.SaveTokenToFile)
+        {
+            ConnectToTwitch(FromCache());
+        }
+    }
+
+    private static ConnectionCredentials FromCache() => new(TwitchUserName, File.ReadAllLines(Path.Combine(CacheFolder, "auth.txt"))[0]);
+
     public void ConnectToTwitch(ConnectionCredentials credentials)
     {
         var clientOptions = new ClientOptions
@@ -55,7 +73,6 @@ public class Main : BloonsTD6Mod
 
         client = new TwitchClient(new WebSocketClient(clientOptions));
         client.Initialize(credentials, "channel");
-
 
         client.OnMessageReceived += Client_OnMessageReceived;
 
@@ -79,7 +96,7 @@ public class Main : BloonsTD6Mod
                 "Sign in to Twitch","Go to https://twitchapps.com/tmi/ to get your token:",
                 new Action(() =>
                 {
-                    ConnectToTwitch(new ConnectionCredentials("streamactions_bot", tokenInput.CurrentValue));
+                    ConnectToTwitch(new ConnectionCredentials(TwitchUserName, tokenInput.CurrentValue));
                 }), "Confirm", null, "Cancel", Popup.TransitionAnim.Scale);
 
             TaskScheduler.ScheduleTask(() =>
