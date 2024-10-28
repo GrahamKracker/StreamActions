@@ -38,7 +38,7 @@ public class Main : BloonsTD6Mod
 
     public static TwitchClient? client;
 
-    private const string TwitchUserName = "StreamActions";
+    private static string TwitchUserName = "grahamkracker1";
 
     public override void OnInitialize()
     {
@@ -72,7 +72,7 @@ public class Main : BloonsTD6Mod
         };
 
         client = new TwitchClient(new WebSocketClient(clientOptions));
-        client.Initialize(credentials, "channel");
+        client.Initialize(credentials, TwitchUserName);
 
         client.OnMessageReceived += Client_OnMessageReceived;
 
@@ -82,7 +82,6 @@ public class Main : BloonsTD6Mod
 
     private void Client_OnMessageReceived(object? sender, OnMessageReceivedArgs e)
     {
-        MelonLogger.Msg("received chat message:");
         MelonLogger.Msg(e.ChatMessage.Message);
     }
 
@@ -90,29 +89,40 @@ public class Main : BloonsTD6Mod
     {
         PopupScreen.instance.SafelyQueue(p =>
         {
+            ModHelperInputField channelInput = null!;
             ModHelperInputField tokenInput = null!;
 
             p.ShowPopup(PopupScreen.Placement.menuCenter,
                 "Sign in to Twitch","Go to https://twitchapps.com/tmi/ to get your token:",
                 new Action(() =>
                 {
-                    ConnectToTwitch(new ConnectionCredentials(TwitchUserName, tokenInput.CurrentValue));
+                    ConnectToTwitch(new ConnectionCredentials(TwitchUserName, tokenInput.InputField.text));
                 }), "Confirm", null, "Cancel", Popup.TransitionAnim.Scale);
 
             TaskScheduler.ScheduleTask(() =>
             {
-                var panel = p.GetFirstActivePopup().bodyObj.AddModHelperPanel(new Info("StreamActionPanel", 400, 650));
+                var panel = p.GetFirstActivePopup().bodyObj.AddModHelperPanel(new Info("StreamActionPanel", InfoPreset.Flex), VanillaSprites.BlueInsertPanelRound, RectTransform.Axis.Vertical, 0);
 
-                tokenInput = panel
+                var channelPanel = panel.AddPanel(new Info("ChannelPanel",
+                    1700, 150F * 1.5f, new Vector2(.5f, 0.1f)), null, RectTransform.Axis.Horizontal, 100);
+                channelPanel.AddText(new Info("ChannelLabel", 200, 150F * 1.5f), "Channel: ", 65);
+                channelInput = channelPanel.AddInputField(new Info("TokenInput", 1700, 150F * 1.5f,
+                        new Vector2(.5f, 0.1f)), "",
+                    VanillaSprites.BlueInsertPanelRound, null, 65);
+
+                var tokenPanel = panel.AddPanel(new Info("TokenPanel",
+                    1700, 150F * 1.5f, new Vector2(.5f, 0.1f)), null, RectTransform.Axis.Horizontal, 100);
+                tokenPanel.AddText(new Info("ChannelLabel", 200, 150F * 1.5f), "Token: ", 65);
+                tokenInput = tokenPanel
                     .AddInputField(new Info("TokenInput",
-                            421.5F * 1.5f, 150F * 1.5f, new Vector2(.5f, 0.1f)),
-                        "", VanillaSprites.BlueInsertPanelRound, null, 52
+                            1700, 150F * 1.5f, new Vector2(.5f, 0.1f)),
+                        "", VanillaSprites.BlueInsertPanelRound, null, 65
                     );
                 tokenInput.InputField.contentType = TMP_InputField.ContentType.Password;
 
                 TaskScheduler.ScheduleTask(() =>
                 {
-                    p.GetFirstActivePopup().bodyObj.transform.localPosition = new Vector3(0, 50, 0);
+                    p.GetFirstActivePopup().bodyObj.transform.localPosition = new Vector3(0, 100, 0);
                 });
             }, () => p.GetFirstActivePopup()?.bodyObj is not null);
         });
