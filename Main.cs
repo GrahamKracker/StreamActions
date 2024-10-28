@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using BTD_Mod_Helper.Api;
+using System.Threading.Tasks;
 using BTD_Mod_Helper.Api.Components;
 using BTD_Mod_Helper.Api.Enums;
 using Il2CppAssets.Scripts.Unity.UI_New.Main;
@@ -22,6 +22,7 @@ using TwitchLib.Communication.Clients;
 using TwitchLib.Communication.Models;
 using UnityEngine;
 using UnityEngine.UI;
+using TaskScheduler = BTD_Mod_Helper.Api.TaskScheduler;
 
 [assembly: MelonInfo(typeof(StreamActions.Main), ModHelperData.Name, ModHelperData.Version, ModHelperData.RepoOwner)]
 [assembly: MelonGame("Ninja Kiwi", "BloonsTD6")]
@@ -75,14 +76,16 @@ public class Main : BloonsTD6Mod
         client.Initialize(credentials, TwitchUserName);
 
         client.OnMessageReceived += Client_OnMessageReceived;
-
-        client.Connect();
+        Task.Run(() => { client.Connect(); });
         MelonLogger.Msg("connected");
     }
 
     private void Client_OnMessageReceived(object? sender, OnMessageReceivedArgs e)
     {
-        MelonLogger.Msg(e.ChatMessage.Message);
+        Task.Run(() =>
+        {
+            MelonLogger.Msg(e.ChatMessage.Message);
+        });
     }
 
     public void CreateSignInPopup()
