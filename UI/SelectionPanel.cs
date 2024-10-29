@@ -21,7 +21,7 @@ public static class SelectionPanel
             Pivot = new Vector2(.5f, .5f),
             Position = new Vector2(600, -2000),
             Width = 1000,
-            Height = textHeight*5,
+            Height = textHeight*6,
         }, null, RectTransform.Axis.Vertical, 0);
         (_timeText = panel.AddText(new Info("TimeUntil", 0, 0, 1000, textHeight), "TimeUntil", 42,
                 TextAlignmentOptions.MidlineLeft)).Text
@@ -33,6 +33,8 @@ public static class SelectionPanel
         (Texts[2] = panel.AddText(new Info("Option3", 0, 0, 1000, textHeight), "3", 42, TextAlignmentOptions.MidlineLeft)).Text
             .enableAutoSizing = true;
         (Texts[3] = panel.AddText(new Info("Option4", 0, 0, 1000, textHeight), "4", 42, TextAlignmentOptions.MidlineLeft)).Text
+            .enableAutoSizing = true;
+        panel.AddText(new Info("Advertising", 0, 0, 1000, textHeight), "Made by GrahamKracker", 42, TextAlignmentOptions.MidlineLeft).Text
             .enableAutoSizing = true;
     }
 
