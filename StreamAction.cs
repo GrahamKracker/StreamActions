@@ -25,7 +25,7 @@ public abstract class StreamAction : NamedModContent
         TotalWeight += Weight;
     }
 
-    public static StreamAction[] GetActionSelections(int amount = 4)
+    public static StreamAction[] GetRandomActionSelections(int amount = 4)
     {
         var actions = new List<StreamAction>();
 

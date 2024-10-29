@@ -5,6 +5,7 @@ using Il2CppAssets.Scripts.Unity.UI_New.Main;
 using Il2CppAssets.Scripts.Unity.UI_New.Main.Home;
 using Il2CppNinjaKiwi.Common.ResourceUtils;
 using Il2CppTMPro;
+using StreamActions.UI.Menus;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -31,9 +32,9 @@ public static class MainMenuButton
         mainMenuButton.GetComponentInChildrenByName<Image>("Button").SetSprite(Sprite);
         var text = mainMenuButton.GetComponentInChildren<NK_TextMeshProUGUI>();
         text.alignment = TextAlignmentOptions.BottomGeoAligned;
-        text.localizeKey = "Twitch \n Sign-In";
+        text.localizeKey = "Stream \n Sign-In";
 
-        mainMenuButton.GetComponentInChildren<Button>().SetOnClick(ModHelper.GetMod<Main>().CreateSignInPopup);
+        mainMenuButton.GetComponentInChildren<Button>().SetOnClick(() => ModGameMenu.Open<PlatformSetupMenu>());
 
         mainMenuButton.transform.SetAsFirstSibling();
 

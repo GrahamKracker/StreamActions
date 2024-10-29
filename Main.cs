@@ -8,18 +8,13 @@ using Il2CppAssets.Scripts.Unity.UI_New.Popups;
 using Il2CppTMPro;
 using MelonLoader.Utils;
 using StreamActions;
+using StreamActions.StreamingPlatforms;
 using TwitchLib.Client;
 using TwitchLib.Client.Models;
 using TwitchLib.Communication.Clients;
 using TwitchLib.Communication.Models;
 
-using TwitchLib.Client;
-using TwitchLib.Client.Enums;
 using TwitchLib.Client.Events;
-using TwitchLib.Client.Extensions;
-using TwitchLib.Client.Models;
-using TwitchLib.Communication.Clients;
-using TwitchLib.Communication.Models;
 using UnityEngine;
 using UnityEngine.UI;
 using TaskScheduler = BTD_Mod_Helper.Api.TaskScheduler;
@@ -36,14 +31,15 @@ public class Main : BloonsTD6Mod
 
     public static string ModFolder = Path.Combine(MelonEnvironment.ModsDirectory, "StreamActions");
     public static string CacheFolder = Path.Combine(ModFolder, "Cache");
-
-    public static TwitchClient? client;
+    public static string CacheFile = Path.Combine(CacheFolder, "cachedlogin.txt");
 
     private static string TwitchUserName = "grahamkracker1";
 
     public override void OnInitialize()
     {
         Logger = LoggerInstance;
+        if(!Directory.Exists(CacheFolder))
+            Directory.CreateDirectory(CacheFolder);
     }
 
     [HarmonyPatch(typeof(MainMenu), nameof(MainMenu.Start))]
@@ -56,78 +52,18 @@ public class Main : BloonsTD6Mod
     /// <inheritdoc />
     public override void OnTitleScreen()
     {
-        if (Settings.SaveTokenToFile)
+        if (Settings.SaveToken)
         {
-            ConnectToTwitch(FromCache());
+            foreach (var streamingPlatform in StreamingPlatform.Platforms)
+            {
+                if(streamingPlatform.LoadFromCache())
+                    return;
+            }
         }
     }
 
-    private static ConnectionCredentials FromCache() => new(TwitchUserName, File.ReadAllLines(Path.Combine(CacheFolder, "auth.txt"))[0]);
-
-    public void ConnectToTwitch(ConnectionCredentials credentials)
+    public static void ChatMessageReceived(string chatMessage)
     {
-        var clientOptions = new ClientOptions
-        {
-            MessagesAllowedInPeriod = 750,
-            ThrottlingPeriod = TimeSpan.FromSeconds(30)
-        };
-
-        client = new TwitchClient(new WebSocketClient(clientOptions));
-        client.Initialize(credentials, TwitchUserName);
-
-        client.OnMessageReceived += Client_OnMessageReceived;
-        Task.Run(() => { client.Connect(); });
-        MelonLogger.Msg("connected");
-    }
-
-    private void Client_OnMessageReceived(object? sender, OnMessageReceivedArgs e)
-    {
-        Task.Run(() =>
-        {
-            MelonLogger.Msg(e.ChatMessage.Message);
-        });
-    }
-
-    public void CreateSignInPopup()
-    {
-        PopupScreen.instance.SafelyQueue(p =>
-        {
-            ModHelperInputField channelInput = null!;
-            ModHelperInputField tokenInput = null!;
-
-            p.ShowPopup(PopupScreen.Placement.menuCenter,
-                "Sign in to Twitch","Go to https://twitchapps.com/tmi/ to get your token:",
-                new Action(() =>
-                {
-                    ConnectToTwitch(new ConnectionCredentials(TwitchUserName, tokenInput.InputField.text));
-                }), "Confirm", null, "Cancel", Popup.TransitionAnim.Scale);
-
-            TaskScheduler.ScheduleTask(() =>
-            {
-                var panel = p.GetFirstActivePopup().bodyObj.AddModHelperPanel(new Info("StreamActionPanel", InfoPreset.Flex), VanillaSprites.BlueInsertPanelRound, RectTransform.Axis.Vertical, 0);
-
-                var channelPanel = panel.AddPanel(new Info("ChannelPanel",
-                    1700, 150F * 1.5f, new Vector2(.5f, 0.1f)), null, RectTransform.Axis.Horizontal, 100);
-                channelPanel.AddText(new Info("ChannelLabel", 200, 150F * 1.5f), "Channel: ", 65);
-                channelInput = channelPanel.AddInputField(new Info("TokenInput", 1700, 150F * 1.5f,
-                        new Vector2(.5f, 0.1f)), "",
-                    VanillaSprites.BlueInsertPanelRound, null, 65);
-
-                var tokenPanel = panel.AddPanel(new Info("TokenPanel",
-                    1700, 150F * 1.5f, new Vector2(.5f, 0.1f)), null, RectTransform.Axis.Horizontal, 100);
-                tokenPanel.AddText(new Info("ChannelLabel", 200, 150F * 1.5f), "Token: ", 65);
-                tokenInput = tokenPanel
-                    .AddInputField(new Info("TokenInput",
-                            1700, 150F * 1.5f, new Vector2(.5f, 0.1f)),
-                        "", VanillaSprites.BlueInsertPanelRound, null, 65
-                    );
-                tokenInput.InputField.contentType = TMP_InputField.ContentType.Password;
-
-                TaskScheduler.ScheduleTask(() =>
-                {
-                    p.GetFirstActivePopup().bodyObj.transform.localPosition = new Vector3(0, 100, 0);
-                });
-            }, () => p.GetFirstActivePopup()?.bodyObj is not null);
-        });
+        MelonLogger.Msg("received: " + chatMessage);
     }
 }
