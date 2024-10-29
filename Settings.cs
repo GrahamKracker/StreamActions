@@ -11,4 +11,10 @@ public class Settings : ModSettings
     {
         displayName = nameof(SaveToken),
     };
+
+    public static ModSettingBool ScalePollCountDown { get; } = new(true)
+    {
+        displayName = nameof(ScalePollCountDown),
+        description = "Whether the countdown until the next poll should be scaled with the in-game speed.",
+    };
 }

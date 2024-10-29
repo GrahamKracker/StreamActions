@@ -1,6 +1,28 @@
-﻿namespace StreamActions.Actions;
+﻿using System;
+using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 
-public class GiveRandomCashAmount
+namespace StreamActions.Actions;
+
+public class GiveRandomCashAmount : StreamAction
 {
-    
+    /// <inheritdoc />
+    public override void OnChosen()
+    {
+        InGame.instance.AddCash(CashAmount);
+    }
+
+    /// <inheritdoc />
+    protected override void BeforeSelection(Random rand)
+    {
+        var roundMult = (InGame.Bridge.GetCurrentRound() + 1) * .25f;
+        CashAmount = rand.Next((int)(100 * roundMult), (int)(1000 * roundMult));
+    }
+
+    /// <inheritdoc />
+    protected override Rarity Weight => Rarity.Common;
+
+    private int CashAmount { get; set; }
+
+    /// <inheritdoc />
+    public override string ChoiceText => $"Give ${CashAmount}";
 }

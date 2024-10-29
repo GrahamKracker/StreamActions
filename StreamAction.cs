@@ -6,35 +6,48 @@ namespace StreamActions;
 
 public abstract class StreamAction : NamedModContent
 {
-    public abstract void OnSelected();
+    public abstract void OnChosen();
 
-    protected abstract int Weight { get; }
+    protected abstract Rarity Weight { get; }
 
     public abstract string ChoiceText { get; }
 
     private static int TotalWeight { get; set; }
 
-    public static Random Random { get; } = new();
+    private static Random Random { get; } = new();
 
     private static readonly Dictionary<Tuple<int, int>, StreamAction> Weights = new();
+    
+    protected virtual void BeforeSelection(Random rand) { }
 
     /// <inheritdoc />
     public override void Register()
     {
-        Weights.Add(new Tuple<int, int>(TotalWeight, TotalWeight + Weight), this);
-        TotalWeight += Weight;
+        Weights.Add(new Tuple<int, int>(TotalWeight, TotalWeight + (int) Weight), this);
+        TotalWeight += (int) Weight;
     }
 
-    public static StreamAction[] GetRandomActionSelections(int amount = 4)
+    public static StreamAction[] GetRandomActionSelections()
     {
-        var actions = new List<StreamAction>();
+        var actions = new StreamAction[4];
 
-        for (int i = 0; i < amount; i++)
+        for (int i = 0; i < 4; i++)
         {
             var num = Random.Next(0, TotalWeight);
-            actions.Add(Weights.First(x => num > x.Key.Item1 && num < x.Key.Item2).Value);
+            MelonLogger.Msg(num);
+            var action = Weights.First(x => num > x.Key.Item1 && num < x.Key.Item2).Value;
+            action.BeforeSelection(Random);
+            actions[i] = action;
         }
 
-        return actions.ToArray();
+        return actions;
+    }
+
+    protected enum Rarity
+    {
+        Common = 1000,
+        Rare = 250,
+        Epic = 100,
+        Legendary = 50,
     }
 }

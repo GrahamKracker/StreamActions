@@ -29,29 +29,36 @@ public class TwitchPlatform : StreamingPlatform
 
     private void InitClient(string username, string token)
     {
-        var clientOptions = new ClientOptions
+        try
         {
-            MessagesAllowedInPeriod = 750,
-            ThrottlingPeriod = TimeSpan.FromSeconds(30)
-        };
-
-        client = new TwitchClient(new WebSocketClient(clientOptions));
-        client.Initialize(new ConnectionCredentials(username, token),
-            username);
-        
-        client.OnMessageReceived += Client_OnMessageReceived;
-        
-        Task.Run(() =>
-
-        {
-            client.Connect();
-            if (Settings.SaveToken)
+            var clientOptions = new ClientOptions
             {
-                SaveToCache();
-            }
+                MessagesAllowedInPeriod = 750,
+                ThrottlingPeriod = TimeSpan.FromSeconds(30)
+            };
 
-            PopupScreen.instance.SafelyQueue(p => { p.ShowOkPopup("Connected to Twitch."); });
-        });
+            client = new TwitchClient(new WebSocketClient(clientOptions));
+            client.Initialize(new ConnectionCredentials(username, token),
+                username);
+
+            client.OnMessageReceived += Client_OnMessageReceived;
+
+            Task.Run(() =>
+
+            {
+                client.Connect();
+                if (Settings.SaveToken)
+                {
+                    SaveToCache();
+                }
+
+                PopupScreen.instance.SafelyQueue(p => { p.ShowOkPopup("Connected to Twitch."); });
+            });
+        }
+        catch (Exception e)
+        {
+            MelonLogger.Error(e);
+        }
     }
 
     /// <inheritdoc />
