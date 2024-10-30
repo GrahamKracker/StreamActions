@@ -13,22 +13,31 @@ public abstract class StreamAction : NamedModContent
     protected abstract Rarity Weight { get; }
 
     public abstract string ChoiceText { get; }
-    public abstract bool IsPositiveEffect { get; }
-    public virtual Color ChoiceColor => IsPositiveEffect ? Color.green : Color.red;
+    protected abstract bool? IsPositiveEffect { get; }
+    public virtual Color ChoiceColor
+    {
+        get {
+            if (IsPositiveEffect == null)
+            {
+                return Color.cyan;
+            }
+
+            return (bool)IsPositiveEffect ? Color.green : Color.red;}
+    }
 
     private static int TotalWeight { get; set; }
 
     private static Random Random { get; } = new();
 
     private static readonly Dictionary<Tuple<int, int>, StreamAction> Weights = new();
-    
-    protected virtual void BeforeSelection(Random rand) { }
+
+    protected abstract void BeforeSelection(Random rand);
 
     /// <inheritdoc />
     public override void Register()
     {
-        Weights.Add(new Tuple<int, int>(TotalWeight, TotalWeight + (int) Weight), this);
-        TotalWeight += (int) Weight;
+        Weights.Add(new Tuple<int, int>(TotalWeight, TotalWeight += (int) Weight), this);
+        MelonLogger.Msg("Added " + Name + " to weights");
     }
 
     public static StreamAction[] GetRandomActionSelections()
@@ -38,7 +47,12 @@ public abstract class StreamAction : NamedModContent
         for (int i = 0; i < 4; i++)
         {
             var num = Random.Next(0, TotalWeight);
-            var action = Weights.First(x => num > x.Key.Item1 && num < x.Key.Item2).Value;
+            var action = Weights.First(x => num >= x.Key.Item1 && num < x.Key.Item2).Value;
+            if (actions.Contains(action))
+            {
+                i--;
+                continue;
+            }
             action.BeforeSelection(Random);
             actions[i] = action;
         }

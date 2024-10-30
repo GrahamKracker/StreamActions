@@ -1,5 +1,4 @@
-﻿
-using BTD_Mod_Helper.Api;
+﻿using BTD_Mod_Helper.Api;
 using BTD_Mod_Helper.Api.Components;
 using Il2CppAssets.Scripts.Unity.UI_New.Main;
 using Il2CppAssets.Scripts.Unity.UI_New.Main.Home;
@@ -9,11 +8,11 @@ using StreamActions.UI.Menus;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace StreamActions;
+namespace StreamActions.UI;
 
 public static class MainMenuButton
 {
-    private static SpriteReference Sprite => ModContent.GetSpriteReference<Main>("TwitchLogo");
+    private static SpriteReference Sprite => ModContent.GetSpriteReference<Main>("TwitchPlatform-Icon");
 
     public static void Create(MainMenu mainMenu)
     {

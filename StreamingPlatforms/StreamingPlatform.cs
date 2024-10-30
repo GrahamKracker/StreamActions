@@ -36,7 +36,7 @@ public abstract class StreamingPlatform : NamedModContent
     }
     public abstract void CreateConnectPanel(ModHelperPanel rightMenu);
 
-    public virtual string Icon => this.GetType().Name + "-Icon";
+    protected virtual string Icon => GetType().Name + "-Icon";
 
     /// <summary>
     /// If you're not going to use a custom .png for your Icon, use this to directly control its SpriteReference

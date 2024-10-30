@@ -27,5 +27,5 @@ public class GiveRandomCashAmount : StreamAction
     public override string ChoiceText => $"Give ${CashAmount}";
 
     /// <inheritdoc />
-    public override bool IsPositiveEffect => true;
+    protected override bool? IsPositiveEffect => true;
 }

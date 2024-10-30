@@ -3,14 +3,18 @@ using Random = System.Random;
 
 namespace StreamActions.Actions;
 
-public class SendNextRounds : StreamAction
+public class SellRandomTowers : StreamAction
 {
     /// <inheritdoc />
     public override void OnChosen()
     {
-        for (int i = 0; i < RoundsToSend; i++)
+        var towers = InGame.instance.bridge.GetAllTowers().ToList();
+
+        for (int i = 0; i < TowersToSell; i++)
         {
-            InGame.instance.bridge.simulation.StartRound();
+            var tower = towers[UnityEngine.Random.Range(0, towers.Count)];
+            tower.tower.SellTower();
+            towers.Remove(tower);
         }
     }
 
@@ -18,7 +22,7 @@ public class SendNextRounds : StreamAction
     protected override Rarity Weight => Rarity.Common;
 
     /// <inheritdoc />
-    public override string ChoiceText => $"Send {RoundsToSend} Round" + (RoundsToSend == 1 ? "" : "s");
+    public override string ChoiceText => $"Sell {TowersToSell} random tower" + (TowersToSell == 1 ? "" : "s");
 
     /// <inheritdoc />
     protected override bool? IsPositiveEffect => false;
@@ -26,13 +30,13 @@ public class SendNextRounds : StreamAction
     /// <inheritdoc />
     protected override void BeforeSelection(Random rand)
     {
-        RoundsToSend = 1;
-        for(int i=0; i<9; i++)
+        TowersToSell = 1;
+        for (int i = 0; i < 9; i++)
         {
             var randomNum = rand.Next(1, 101);
             if (randomNum <= 50 - (i * 10))
             {
-                RoundsToSend++;
+                TowersToSell++;
             }
             else
             {
@@ -41,5 +45,5 @@ public class SendNextRounds : StreamAction
         }
     }
 
-    private int RoundsToSend { get; set; }
+    private int TowersToSell { get; set; }
 }
