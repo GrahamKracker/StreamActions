@@ -81,14 +81,14 @@ public class Main : BloonsTD6Mod
 
         if (InGame.instance != null && InGame.instance.IsInGame() && TimeUntilNextAction <= 0)
         {
-            SelectionPanel.Update(StreamAction.GetRandomActionSelections());
-            TimeUntilNextAction = Random.Range(30, 60);
+            if(SelectionPanel.Update(StreamAction.GetRandomActionSelections()))
+                TimeUntilNextAction = Random.Range(30, 60);
         }
     }
 
     [HarmonyPatch(typeof(MainHudLeftAlign), nameof(MainHudLeftAlign.Initialise))]
     [HarmonyPostfix]
-    private static void InGameUIRect_UpdateRect(MainHudLeftAlign __instance)
+    private static void MainHudLeftAlign_Initialise(MainHudLeftAlign __instance)
     {
         SelectionPanel.Create(__instance);
     }

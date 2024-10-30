@@ -23,9 +23,12 @@ public static class SelectionPanel
             Width = 1000,
             Height = textHeight*6,
         }, null, RectTransform.Axis.Vertical, 0);
-        (_timeText = panel.AddText(new Info("TimeUntil", 0, 0, 1000, textHeight), "TimeUntil", 42,
-                TextAlignmentOptions.MidlineLeft)).Text
-            .enableAutoSizing = true;
+        _timeText = panel.AddText(new Info("TimeUntil", 0, 0, 1000, textHeight), "TimeUntil", 42,
+                TextAlignmentOptions.MidlineLeft);
+
+        _timeText.Text.enableAutoSizing = true;
+        _timeText.Text.color = Color.yellow;
+
         (Texts[0] = panel.AddText(new Info("Option1", 0, 0, 1000, textHeight), "1", 42, TextAlignmentOptions.MidlineLeft)).Text
             .enableAutoSizing = true;
         (Texts[1] = panel.AddText(new Info("Option2", 0, 0, 1000, textHeight), "2", 42, TextAlignmentOptions.MidlineLeft)).Text
@@ -34,23 +37,30 @@ public static class SelectionPanel
             .enableAutoSizing = true;
         (Texts[3] = panel.AddText(new Info("Option4", 0, 0, 1000, textHeight), "4", 42, TextAlignmentOptions.MidlineLeft)).Text
             .enableAutoSizing = true;
-        panel.AddText(new Info("Advertising", 0, 0, 1000, textHeight), "Made by GrahamKracker", 42, TextAlignmentOptions.MidlineLeft).Text
-            .enableAutoSizing = true;
+        var advertising = panel.AddText(new Info("Advertising", 0, 0, 1000, textHeight), "Made by GrahamKracker", 42, TextAlignmentOptions.MidlineLeft);
+        advertising.Text.enableAutoSizing = true;
+        advertising.Text.color = new Color(117, 0, 195);
     }
 
-    public static void Update(StreamAction[] streamActions)
+    public static bool Update(StreamAction[] streamActions)
     {
+        if(Texts.Any(x=>x == null))
+            return false;
+
         for (var i = 0; i < streamActions.Length; i++)
         {
             var streamAction = streamActions[i];
-            if(Texts[i] == null)
-                continue;
+
             Texts[i].SetText($"{i + 1}: {streamAction.ChoiceText}");
+            Texts[i].Text.color = streamAction.ChoiceColor;
         }
+
+        return true;
     }
 
     public static void UpdateTimeUntil(float timeUntil)
     {
-        _timeText?.SetText($"{Math.Floor(timeUntil)}s left of voting");
+        if (_timeText != null)
+            _timeText.SetText($"{Math.Floor(timeUntil)}s left of voting");
     }
 }

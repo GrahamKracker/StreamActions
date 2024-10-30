@@ -14,7 +14,7 @@ public class GiveRandomCashAmount : StreamAction
     /// <inheritdoc />
     protected override void BeforeSelection(Random rand)
     {
-        var roundMult = (InGame.Bridge.GetCurrentRound() + 1) * .25f;
+        var roundMult = (InGame.Bridge.GetCurrentRound() + 1) * .25f; //TODO find a fair algorithm
         CashAmount = rand.Next((int)(100 * roundMult), (int)(1000 * roundMult));
     }
 
@@ -25,4 +25,7 @@ public class GiveRandomCashAmount : StreamAction
 
     /// <inheritdoc />
     public override string ChoiceText => $"Give ${CashAmount}";
+
+    /// <inheritdoc />
+    public override bool IsPositiveEffect => true;
 }

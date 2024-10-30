@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using BTD_Mod_Helper.Api;
+using UnityEngine;
+using Random = System.Random;
 
 namespace StreamActions;
 
@@ -11,6 +13,8 @@ public abstract class StreamAction : NamedModContent
     protected abstract Rarity Weight { get; }
 
     public abstract string ChoiceText { get; }
+    public abstract bool IsPositiveEffect { get; }
+    public virtual Color ChoiceColor => IsPositiveEffect ? Color.green : Color.red;
 
     private static int TotalWeight { get; set; }
 
@@ -34,7 +38,6 @@ public abstract class StreamAction : NamedModContent
         for (int i = 0; i < 4; i++)
         {
             var num = Random.Next(0, TotalWeight);
-            MelonLogger.Msg(num);
             var action = Weights.First(x => num > x.Key.Item1 && num < x.Key.Item2).Value;
             action.BeforeSelection(Random);
             actions[i] = action;
