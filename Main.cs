@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BTD_Mod_Helper.Api.Components;
 using BTD_Mod_Helper.Api.Enums;
@@ -34,8 +36,8 @@ public class Main : BloonsTD6Mod
 {
     internal static MelonLogger.Instance Logger;
 
-    public static string ModFolder = Path.Combine(MelonEnvironment.ModsDirectory, "StreamActions");
-    public static string CacheFolder = Path.Combine(ModFolder, "Cache");
+    private static string ModFolder = Path.Combine(MelonEnvironment.ModsDirectory, "StreamActions");
+    private static string CacheFolder = Path.Combine(ModFolder, "Cache");
     public static string CacheFile = Path.Combine(CacheFolder, "cachedlogin.txt");
 
     private static string TwitchUserName = "grahamkracker1";
@@ -70,21 +72,72 @@ public class Main : BloonsTD6Mod
     public static void ChatMessageReceived(string chatMessage)
     {
         MelonLogger.Msg("received: " + chatMessage);
+        Regex regex = new(@"^([1-4])\1*$");
+        if (regex.IsMatch(chatMessage))
+        {
+            MelonLogger.Warning("is match");
+            if (int.TryParse(chatMessage[0].ToString(), out int i) && i is >= 1 and <= 4)
+            {
+                Votes[i]++;
+            }
+        }
+        else
+        {
+            MelonLogger.Msg("not match");
+        }
     }
 
-    private static float TimeUntilNextAction;
+    private float _timeUntilNextAction;
+    public static Dictionary<int, StreamAction> ActionOptions { get; } = new();
+
+    public static Dictionary<int, int> Votes { get; } = new()
+    {
+        {1, 0},
+        {2, 0},
+        {3, 0},
+        {4, 0},
+    };
+
 
     public override void OnUpdate()
     {
-        TimeUntilNextAction -= Settings.ScalePollCountDown ? Time.deltaTime : Time.unscaledDeltaTime;
-        SelectionPanel.UpdateTimeUntil(TimeUntilNextAction);
+        _timeUntilNextAction -= Settings.ScalePollCountDown ? Time.deltaTime : Time.unscaledDeltaTime;
+        SelectionPanel.UpdateTimeUntil(_timeUntilNextAction);
 
-        if (InGame.instance != null && InGame.instance.IsInGame() && TimeUntilNextAction <= 0)
+        if (InGame.instance != null && InGame.instance.IsInGame() && _timeUntilNextAction <= 0)
         {
-            if(SelectionPanel.Update(StreamAction.GetRandomActionSelections()))
-                TimeUntilNextAction = Random.Range(30, 60);
+            if (ActionOptions.TryGetValue(Votes.MaxBy(y => y.Value).Key, out var chosen))
+            {
+                try
+                {
+                    chosen.OnChosen();
+                    MelonLogger.Msg("Activated action: " + chosen.ChoiceText);
+                }
+                catch (Exception e)
+                {
+                    MelonLogger.Error(e);
+                }
+            }
+
+            foreach (var i in Votes.Keys)
+            {
+                Votes[i] = 0;
+            }
+
+            StreamAction.RandomizeActionOptions();
+            if(SelectionPanel.Update(ActionOptions.Values))
+                _timeUntilNextAction = Random.Range(30, 60);
+        }
+
+        if (Time.time - lastVoteUpdate < voteUpdateCooldown)
+        {
+            SelectionPanel.UpdateVotes();
+            lastVoteUpdate = Time.time;
         }
     }
+
+    private float lastVoteUpdate = Time.time;
+    private float voteUpdateCooldown = .5f;
 
     [HarmonyPatch(typeof(MainHudLeftAlign), nameof(MainHudLeftAlign.Initialise))]
     [HarmonyPostfix]

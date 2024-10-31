@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using BTD_Mod_Helper.Api.Components;
 using BTD_Mod_Helper.Api.Enums;
@@ -42,20 +43,40 @@ public static class SelectionPanel
         advertising.Text.color = new Color(117, 0, 195);
     }
 
-    public static bool Update(StreamAction[] streamActions)
+    public static bool Update(Dictionary<int, StreamAction>.ValueCollection streamActions)
     {
         if(Texts.Any(x=>x == null))
             return false;
 
-        for (var i = 0; i < streamActions.Length; i++)
-        {
-            var streamAction = streamActions[i];
 
+        int i = 0;
+        foreach (var streamAction in streamActions)
+        {
             Texts[i].SetText($"{i + 1}: {streamAction.ChoiceText}");
             Texts[i].Text.color = streamAction.ChoiceColor;
+            i++;
         }
 
         return true;
+    }
+
+    public static void UpdateVotes()
+    {
+        if (Texts.Any(x => x == null))
+            return;
+
+        foreach ((int index, int amount) in Main.Votes)
+        {
+            int i = index - 1;
+            var text = Texts[i].Text.text;
+            var voteIndex = text.LastIndexOf(" (", StringComparison.Ordinal);
+            if (voteIndex == -1)
+            {
+                Texts[i].SetText($"{text} ({amount})");
+                continue;
+            }
+            Texts[i].SetText($"{text.Remove(voteIndex)} ({amount})");
+        }
     }
 
     public static void UpdateTimeUntil(float timeUntil)

@@ -12,6 +12,8 @@ public class SellRandomTowers : StreamAction
 
         for (int i = 0; i < TowersToSell; i++)
         {
+            if(towers.Count == 0)
+                return;
             var tower = towers[UnityEngine.Random.Range(0, towers.Count)];
             tower.tower.SellTower();
             towers.Remove(tower);

@@ -40,24 +40,22 @@ public abstract class StreamAction : NamedModContent
         MelonLogger.Msg("Added " + Name + " to weights");
     }
 
-    public static StreamAction[] GetRandomActionSelections()
+    public static void RandomizeActionOptions()
     {
-        var actions = new StreamAction[4];
-
-        for (int i = 0; i < 4; i++)
+        ActionOptions.Clear();
+        int i = 1;
+        while(i <= 4)
         {
             var num = Random.Next(0, TotalWeight);
             var action = Weights.First(x => num >= x.Key.Item1 && num < x.Key.Item2).Value;
-            if (actions.Contains(action))
+            if (ActionOptions.ContainsValue(action))
             {
-                i--;
                 continue;
             }
             action.BeforeSelection(Random);
-            actions[i] = action;
+            ActionOptions[i] = action;
+            i++;
         }
-
-        return actions;
     }
 
     protected enum Rarity
