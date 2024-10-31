@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
 using BTD_Mod_Helper.Api.Components;
 using BTD_Mod_Helper.Api.Enums;
 using Il2CppAssets.Scripts.Unity.UI_New;
 using Il2CppTMPro;
+using StreamActions.UI.Behaviors;
 using UnityEngine;
 
 namespace StreamActions.UI;
@@ -24,6 +24,8 @@ public static class SelectionPanel
             Width = 1000,
             Height = textHeight*6,
         }, null, RectTransform.Axis.Vertical, 0);
+        panel.gameObject.AddComponent<SelectionPanelBehaviour>();
+
         _timeText = panel.AddText(new Info("TimeUntil", 0, 0, 1000, textHeight), "TimeUntil", 42,
                 TextAlignmentOptions.MidlineLeft);
 
@@ -43,27 +45,28 @@ public static class SelectionPanel
         advertising.Text.color = new Color(117, 0, 195);
     }
 
-    public static bool Update(Dictionary<int, StreamAction>.ValueCollection streamActions)
+    public static bool DoTextsExist() => !Texts.Any(x => x == null);
+
+    public static void Update()
     {
-        if(Texts.Any(x=>x == null))
-            return false;
+        if(!DoTextsExist()) return;
 
 
         int i = 0;
-        foreach (var streamAction in streamActions)
+        foreach (var streamAction in Main.ActionOptions.Values)
         {
             Texts[i].SetText($"{i + 1}: {streamAction.ChoiceText}");
             Texts[i].Text.color = streamAction.ChoiceColor;
             i++;
         }
-
-        return true;
     }
 
     public static void UpdateVotes()
     {
         if (Texts.Any(x => x == null))
             return;
+
+        MelonLogger.Msg("updatevotes");
 
         foreach ((int index, int amount) in Main.Votes)
         {

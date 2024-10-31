@@ -15,6 +15,6 @@ public class Settings : ModSettings
     public static ModSettingBool ScalePollCountDown { get; } = new(true)
     {
         displayName = nameof(ScalePollCountDown),
-        description = "Whether the countdown until the next poll should be scaled with the in-game speed.",
+        description = "Whether the countdown until the next poll should be scaled with the in-game speed. Also makes the timer continue counting down when the game is paused.",
     };
 }

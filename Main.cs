@@ -87,7 +87,6 @@ public class Main : BloonsTD6Mod
         }
     }
 
-    private float _timeUntilNextAction;
     public static Dictionary<int, StreamAction> ActionOptions { get; } = new();
 
     public static Dictionary<int, int> Votes { get; } = new()
@@ -98,51 +97,11 @@ public class Main : BloonsTD6Mod
         {4, 0},
     };
 
-
-    public override void OnUpdate()
-    {
-        _timeUntilNextAction -= Settings.ScalePollCountDown ? Time.deltaTime : Time.unscaledDeltaTime;
-        SelectionPanel.UpdateTimeUntil(_timeUntilNextAction);
-
-        if (InGame.instance != null && InGame.instance.IsInGame() && _timeUntilNextAction <= 0)
-        {
-            if (ActionOptions.TryGetValue(Votes.MaxBy(y => y.Value).Key, out var chosen))
-            {
-                try
-                {
-                    chosen.OnChosen();
-                    MelonLogger.Msg("Activated action: " + chosen.ChoiceText);
-                }
-                catch (Exception e)
-                {
-                    MelonLogger.Error(e);
-                }
-            }
-
-            foreach (var i in Votes.Keys)
-            {
-                Votes[i] = 0;
-            }
-
-            StreamAction.RandomizeActionOptions();
-            if(SelectionPanel.Update(ActionOptions.Values))
-                _timeUntilNextAction = Random.Range(30, 60);
-        }
-
-        if (Time.time - lastVoteUpdate < voteUpdateCooldown)
-        {
-            SelectionPanel.UpdateVotes();
-            lastVoteUpdate = Time.time;
-        }
-    }
-
-    private float lastVoteUpdate = Time.time;
-    private float voteUpdateCooldown = .5f;
-
     [HarmonyPatch(typeof(MainHudLeftAlign), nameof(MainHudLeftAlign.Initialise))]
     [HarmonyPostfix]
     private static void MainHudLeftAlign_Initialise(MainHudLeftAlign __instance)
     {
         SelectionPanel.Create(__instance);
     }
+
 }

@@ -6,6 +6,7 @@ using Random = System.Random;
 
 namespace StreamActions;
 
+[HarmonyPatch]
 public abstract class StreamAction : NamedModContent
 {
     public abstract void OnChosen();
