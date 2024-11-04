@@ -19,7 +19,7 @@ public class LoseRandomCashAmount : StreamAction
     }
 
     /// <inheritdoc />
-    protected override Rarity Weight => Rarity.Common;
+    public override Rarity Weight => Rarity.Common;
 
     private int CashAmount { get; set; }
 

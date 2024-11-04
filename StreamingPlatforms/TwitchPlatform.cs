@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using BTD_Mod_Helper.Api.Components;
@@ -65,7 +66,7 @@ public class TwitchPlatform : StreamingPlatform
     protected override string[] CacheData => [client.ConnectionCredentials.TwitchUsername, client.ConnectionCredentials.TwitchOAuth];
 
     /// <inheritdoc />
-    public override bool LoadFromCacheData(string[] lines)
+    protected override bool LoadFromCacheData(string[] lines)
     {
         InitClient(lines[1], lines[2]);
         return true;
@@ -73,7 +74,8 @@ public class TwitchPlatform : StreamingPlatform
 
     private void Client_OnMessageReceived(object? sender, OnMessageReceivedArgs e)
     {
-        ChatMessageReceived(e.ChatMessage.Message);
+        if(ChannelsAnswered.Add(e.ChatMessage.Channel))
+            ChatMessageReceived(e.ChatMessage.Message);
     }
 
     /// <inheritdoc />

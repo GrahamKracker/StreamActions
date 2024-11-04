@@ -1,33 +1,32 @@
-﻿using Il2CppAssets.Scripts.Models.Bloons;
+﻿using System.Collections.Immutable;
+using Il2CppAssets.Scripts.Models.Bloons;
 using Il2CppAssets.Scripts.Simulation.Bloons;
 using Il2CppAssets.Scripts.Simulation.Track;
+using Il2CppAssets.Scripts.Unity;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
+using Il2CppSystem;
 using Random = System.Random;
 
 namespace StreamActions.Actions;
 
 public class SpeedUpBloons : StreamAction
 {
-    [HarmonyPatch(typeof(Spawner), nameof(Spawner.Emit))]
-    [HarmonyPostfix]
-    private static void Spawner_Emit(Spawner __instance, BloonModel bloonModel)
-    {
-        MelonLogger.Msg("Spawner::Emit with speed: " + bloonModel.Speed);
-    }
     /// <inheritdoc />
     public override void OnChosen()
     {
-        foreach (var bloon in CosmeticHelper.coopPlayerBloonMods.Values().SelectMany(x=>x.bloonsByName.Values()).Select(x=>x.bloonModel))
+        foreach (var bloon in InGame.instance.GetSimulation().model.bloons)
         {
-            //bloon.Speed += (bloon.Speed * (PercentageSpeedUp/*/100f*/));
-            bloon.Speed *= (1000);
-            MelonLogger.Msg("Speed: " + bloon.Speed);
-            MelonLogger.Msg("cosmetic speed: " + CosmeticHelper.GetBloonModel(bloon.id, 0).bloonModel.Speed);
+            bloon.Speed += (bloon.Speed * (PercentageSpeedUp / 100f));
+        }
+
+        foreach(var bloon in CosmeticHelper.coopPlayerBloonMods[InGame.instance.GetUnityToSimulation().MyPlayerNumber].bloonsByName._values)
+        {
+            bloon.bloonModel.Speed += (bloon.bloonModel.Speed * (PercentageSpeedUp / 100f));
         }
     }
 
     /// <inheritdoc />
-    protected override Rarity Weight => (Rarity) 100000;
+    public override Rarity Weight => Rarity.Rare;
 
     /// <inheritdoc />
     public override string ChoiceText => $"Speed up Bloons by {PercentageSpeedUp}%";

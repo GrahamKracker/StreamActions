@@ -101,7 +101,7 @@ public class Main : BloonsTD6Mod
     [HarmonyPostfix]
     private static void MainHudLeftAlign_Initialise(MainHudLeftAlign __instance)
     {
-        SelectionPanel.Create(__instance);
+        PollPanel.Create(__instance);
     }
 
 }

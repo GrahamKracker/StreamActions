@@ -12,12 +12,16 @@ namespace StreamActions.StreamingPlatforms;
 public abstract class StreamingPlatform : NamedModContent
 {
     public static List<StreamingPlatform> Platforms { get; } = [];
+    protected HashSet<string> ChannelsAnswered { get; } = [];
 
+    public virtual void OnNewPoll(){
+        ChannelsAnswered.Clear();
+    }
     public abstract void ConnectToPlatform();
 
     protected abstract string[] CacheData { get; }
 
-    public void SaveToCache()
+    protected void SaveToCache()
     {
         var lines = new List<string> { Name };
         lines.AddRange(CacheData);
@@ -25,7 +29,7 @@ public abstract class StreamingPlatform : NamedModContent
             File.WriteAllLines(CacheFile, lines);
     }
 
-    public abstract bool LoadFromCacheData(string[] lines);
+    protected abstract bool LoadFromCacheData(string[] lines);
 
     public bool LoadFromCache()
     {

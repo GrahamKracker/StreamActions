@@ -1,9 +1,9 @@
 ﻿namespace StreamActions;
 
-public abstract class DurationAction : StreamAction
+public abstract class TimedAction : StreamAction
 {
     public virtual void OnUpdate() { }
     public virtual void OnEnd() { }
 
-    public abstract float GetDurationInSeconds();
+    public abstract int Duration { get; }
 }

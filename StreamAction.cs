@@ -11,7 +11,7 @@ public abstract class StreamAction : NamedModContent
 {
     public abstract void OnChosen();
 
-    protected abstract Rarity Weight { get; }
+    public abstract Rarity Weight { get; }
 
     public abstract string ChoiceText { get; }
     protected abstract bool? IsPositiveEffect { get; }
@@ -38,7 +38,6 @@ public abstract class StreamAction : NamedModContent
     public override void Register()
     {
         Weights.Add(new Tuple<int, int>(TotalWeight, TotalWeight += (int) Weight), this);
-        MelonLogger.Msg("Added " + Name + " to weights");
     }
 
     public static void RandomizeActionOptions()
@@ -53,13 +52,23 @@ public abstract class StreamAction : NamedModContent
             {
                 continue;
             }
-            action.BeforeSelection(Random);
+
+            try
+            {
+                action.BeforeSelection(Random);
+            }
+            catch (Exception e)
+            {
+                MelonLogger.Error(e);
+                continue;
+            }
+
             ActionOptions[i] = action;
             i++;
         }
     }
 
-    protected enum Rarity
+    public enum Rarity
     {
         Common = 1000,
         Rare = 250,

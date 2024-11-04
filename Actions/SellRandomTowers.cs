@@ -21,7 +21,7 @@ public class SellRandomTowers : StreamAction
     }
 
     /// <inheritdoc />
-    protected override Rarity Weight => Rarity.Common;
+    public override Rarity Weight => Rarity.Common;
 
     /// <inheritdoc />
     public override string ChoiceText => $"Sell {TowersToSell} random tower" + (TowersToSell == 1 ? "" : "s");
@@ -33,7 +33,7 @@ public class SellRandomTowers : StreamAction
     protected override void BeforeSelection(Random rand)
     {
         TowersToSell = 1;
-        for (int i = 0; i < 9; i++)
+        for (int i = 0; i < 5; i++)
         {
             var randomNum = rand.Next(1, 101);
             if (randomNum <= 50 - (i * 10))

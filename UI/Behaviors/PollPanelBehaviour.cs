@@ -12,7 +12,7 @@ using Random = UnityEngine.Random;
 namespace StreamActions.UI.Behaviors;
 
 [RegisterTypeInIl2Cpp(false)]
-public class SelectionPanelBehaviour(IntPtr ptr) : MonoBehaviour(ptr)
+public class PollPanelBehaviour(IntPtr ptr) : MonoBehaviour(ptr)
 {
     private float _timeUntilNextPoll;
     private float _lastVoteUpdate;
@@ -21,14 +21,14 @@ public class SelectionPanelBehaviour(IntPtr ptr) : MonoBehaviour(ptr)
     private void Start()
     {
         StreamAction.RandomizeActionOptions();
-        SelectionPanel.Update();
+        PollPanel.Update();
         _timeUntilNextPoll = Random.Range(30, 60);
     }
 
     private void Update()
     {
         _timeUntilNextPoll -= Settings.ScalePollCountDown ? Time.deltaTime : Time.unscaledDeltaTime;
-        SelectionPanel.UpdateTimeUntil(_timeUntilNextPoll);
+        PollPanel.UpdateTimeUntil(_timeUntilNextPoll);
 
         if (_timeUntilNextPoll <= 0 && ActionOptions.TryGetValue(Votes.MaxBy(y => y.Value).Key, out var chosen))
         {
@@ -47,15 +47,20 @@ public class SelectionPanelBehaviour(IntPtr ptr) : MonoBehaviour(ptr)
                 Votes[i] = 0;
             }
 
+            foreach (var streamingPlatform in StreamingPlatform.Platforms)
+            {
+                streamingPlatform.OnNewPoll();
+            }
+
             StreamAction.RandomizeActionOptions();
-            SelectionPanel.Update();
+            PollPanel.Update();
 
             _timeUntilNextPoll = Random.Range(30, 60);
         }
 
         if (Time.time - _lastVoteUpdate < VoteUpdateCooldown)
         {
-            SelectionPanel.UpdateVotes();
+            PollPanel.UpdateVotes();
             _lastVoteUpdate = Time.time;
         }
     }
