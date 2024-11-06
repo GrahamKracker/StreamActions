@@ -56,6 +56,8 @@ public class PollPanelBehaviour(IntPtr ptr) : MonoBehaviour(ptr)
             PollPanel.Update();
 
             _timeUntilNextPoll = Random.Range(30, 60);
+            if(chosen is TimedAction timedAction)
+                _timeUntilNextPoll = Math.Max(_timeUntilNextPoll, timedAction.Duration);
         }
 
         if (Time.time - _lastVoteUpdate < VoteUpdateCooldown)

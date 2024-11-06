@@ -24,9 +24,5 @@
         <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.29"/>
     </ItemGroup>
     
-    <ItemGroup>
-      <Folder Include="Actions\TimedActions\" />
-    </ItemGroup>
-    
     <Import Project="..\btd6.targets"/>
 </Project>
