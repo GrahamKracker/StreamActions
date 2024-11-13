@@ -17,6 +17,7 @@ public class PollPanelBehaviour(IntPtr ptr) : MonoBehaviour(ptr)
     private float _timeUntilNextPoll;
     private float _lastVoteUpdate;
     private const float VoteUpdateCooldown = .5f;
+    private StreamAction? currentAction;
 
     private void Start()
     {
@@ -29,35 +30,52 @@ public class PollPanelBehaviour(IntPtr ptr) : MonoBehaviour(ptr)
     {
         _timeUntilNextPoll -= Settings.ScalePollCountDown ? Time.deltaTime : Time.unscaledDeltaTime;
         PollPanel.UpdateTimeUntil(_timeUntilNextPoll);
-
-        if (_timeUntilNextPoll <= 0 && ActionOptions.TryGetValue(Votes.MaxBy(y => y.Value).Key, out var chosen))
+        var timedAction = currentAction as TimedAction;
+        if (timedAction is { IsOngoing: true })
         {
-            try
-            {
-                chosen.OnChosen();
-                MelonLogger.Msg("Activated action: " + chosen.ChoiceText);
-            }
-            catch (Exception e)
-            {
-                MelonLogger.Error(e);
-            }
+            timedAction.OnUpdate();
+        }
 
-            foreach (var i in Votes.Keys)
+        if (_timeUntilNextPoll <= 0)
+        {
+            if (timedAction is { IsOngoing: true })
             {
-                Votes[i] = 0;
+                timedAction.OnEnd();
+                timedAction.IsOngoing = false;
             }
 
-            foreach (var streamingPlatform in StreamingPlatform.Platforms)
+            if (ActionOptions.TryGetValue(Votes.MaxBy(y => y.Value).Key, out currentAction))
             {
-                streamingPlatform.OnNewPoll();
+                try
+                {
+                    currentAction.OnChosen();
+                    MelonLogger.Msg("Activated action: " + currentAction.ChoiceText);
+                }
+                catch (Exception e)
+                {
+                    MelonLogger.Error(e);
+                }
+
+                foreach (var i in Votes.Keys)
+                {
+                    Votes[i] = 0;
+                }
+
+                foreach (var streamingPlatform in StreamingPlatform.Platforms)
+                {
+                    streamingPlatform.OnNewPoll();
+                }
+
+                StreamAction.RandomizeActionOptions();
+                PollPanel.Update();
+
+                _timeUntilNextPoll = Random.Range(30, 60);
+                if (timedAction != null)
+                {
+                    _timeUntilNextPoll = Math.Max(_timeUntilNextPoll, timedAction.Duration);
+                    timedAction.IsOngoing = true;
+                }
             }
-
-            StreamAction.RandomizeActionOptions();
-            PollPanel.Update();
-
-            _timeUntilNextPoll = Random.Range(30, 60);
-            if(chosen is TimedAction timedAction)
-                _timeUntilNextPoll = Math.Max(_timeUntilNextPoll, timedAction.Duration);
         }
 
         if (Time.time - _lastVoteUpdate < VoteUpdateCooldown)
