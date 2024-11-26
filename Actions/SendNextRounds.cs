@@ -15,7 +15,7 @@ public class SendNextRounds : StreamAction
     }
 
     /// <inheritdoc />
-    public override Rarity Weight => Rarity.Common;
+    protected override Rarity Weight => Rarity.Common;
 
     /// <inheritdoc />
     public override string ChoiceText => $"Send {RoundsToSend} Round" + (RoundsToSend == 1 ? "" : "s");

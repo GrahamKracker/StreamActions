@@ -53,7 +53,7 @@ public class TowersFollowMouse : StreamAction
     }
 
     /// <inheritdoc />
-    public override Rarity Weight => Rarity.Epic;
+    protected override Rarity Weight => Rarity.Epic;
 
     /// <inheritdoc />
     public override string ChoiceText => "Placed towers now target cursor. Removed on upgrade";

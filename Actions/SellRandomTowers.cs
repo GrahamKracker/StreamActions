@@ -21,7 +21,7 @@ public class SellRandomTowers : StreamAction
     }
 
     /// <inheritdoc />
-    public override Rarity Weight => Rarity.Common;
+    protected override Rarity Weight => Rarity.Common;
 
     /// <inheritdoc />
     public override string ChoiceText => $"Sell {TowersToSell} random tower" + (TowersToSell == 1 ? "" : "s");

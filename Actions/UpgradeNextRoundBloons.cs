@@ -58,7 +58,7 @@ public class UpgradeNextRoundBloons : StreamAction
     }
 
     /// <inheritdoc />
-    public override Rarity Weight => Rarity.Common;
+    protected override Rarity Weight => Rarity.Common;
 
     /// <inheritdoc />
     public override string ChoiceText => "Upgrades each bloon in the next round by 1 tier";

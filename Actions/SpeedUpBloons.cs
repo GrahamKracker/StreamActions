@@ -26,7 +26,7 @@ public class SpeedUpBloons : StreamAction
     }
 
     /// <inheritdoc />
-    public override Rarity Weight => Rarity.Rare;
+    protected override Rarity Weight => Rarity.Rare;
 
     /// <inheritdoc />
     public override string ChoiceText => $"Speed up Bloons by {PercentageSpeedUp}%";

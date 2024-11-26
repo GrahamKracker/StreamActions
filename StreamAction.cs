@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BTD_Mod_Helper.Api;
+using JetBrains.Annotations;
 using UnityEngine;
 using Random = System.Random;
 
@@ -11,10 +12,11 @@ public abstract class StreamAction : NamedModContent
 {
     public abstract void OnChosen();
 
-    public abstract Rarity Weight { get; }
+    protected abstract Rarity Weight { get; }
 
     public abstract string ChoiceText { get; }
     protected abstract bool? IsPositiveEffect { get; }
+
     public virtual Color ChoiceColor
     {
         get {
@@ -23,7 +25,7 @@ public abstract class StreamAction : NamedModContent
                 return Color.cyan;
             }
 
-            return (bool)IsPositiveEffect ? Color.green : Color.red;}
+            return (bool) IsPositiveEffect ? Color.green : Color.red;}
     }
 
     private static int TotalWeight { get; set; }
@@ -68,7 +70,7 @@ public abstract class StreamAction : NamedModContent
         }
     }
 
-    public enum Rarity
+    protected enum Rarity
     {
         Common = 1000,
         Rare = 250,

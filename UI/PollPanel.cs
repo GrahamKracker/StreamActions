@@ -50,7 +50,6 @@ public static class PollPanel
     {
         if(!DoTextsExist()) return;
 
-
         int i = 0;
         foreach (var streamAction in Main.ActionOptions.Values)
         {
@@ -84,4 +83,6 @@ public static class PollPanel
         if (_timeText != null)
             _timeText.SetText($"{Math.Floor(timeUntil)}s left of voting");
     }
+
+    //todo: time left in timed action
 }

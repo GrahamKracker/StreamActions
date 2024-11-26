@@ -31,7 +31,7 @@ public class PlaceRandomTowers : StreamAction
     }
 
     /// <inheritdoc />
-    public override Rarity Weight => Rarity.Epic;
+    protected override Rarity Weight => Rarity.Epic;
 
     /// <inheritdoc />
     public override string ChoiceText => $"Place {TowersToAdd} random tower{(TowersToAdd == 1 ? "" : "s")} at a random spot";

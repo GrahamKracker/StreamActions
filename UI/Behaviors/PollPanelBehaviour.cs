@@ -18,6 +18,7 @@ public class PollPanelBehaviour(IntPtr ptr) : MonoBehaviour(ptr)
     private float _lastVoteUpdate;
     private const float VoteUpdateCooldown = .5f;
     private StreamAction? currentAction;
+    private float _timeSinceLastActionStart;
 
     private void Start()
     {
@@ -29,26 +30,33 @@ public class PollPanelBehaviour(IntPtr ptr) : MonoBehaviour(ptr)
     private void Update()
     {
         _timeUntilNextPoll -= Settings.ScalePollCountDown ? Time.deltaTime : Time.unscaledDeltaTime;
+        _timeSinceLastActionStart += Settings.ScalePollCountDown ? Time.deltaTime : Time.unscaledDeltaTime;
         PollPanel.UpdateTimeUntil(_timeUntilNextPoll);
+
+
         var timedAction = currentAction as TimedAction;
         if (timedAction is { IsOngoing: true })
         {
             timedAction.OnUpdate();
         }
 
+        if(_timeSinceLastActionStart > timedAction?.Duration)
+        {
+            timedAction.OnEnd();
+            timedAction.IsOngoing = false;
+            currentAction = null;
+            _timeSinceLastActionStart = 0;
+        }
+
+
         if (_timeUntilNextPoll <= 0)
         {
-            if (timedAction is { IsOngoing: true })
-            {
-                timedAction.OnEnd();
-                timedAction.IsOngoing = false;
-            }
-
             if (ActionOptions.TryGetValue(Votes.MaxBy(y => y.Value).Key, out currentAction))
             {
                 try
                 {
                     currentAction.OnChosen();
+                    _timeSinceLastActionStart = 0;
                     MelonLogger.Msg("Activated action: " + currentAction.ChoiceText);
                 }
                 catch (Exception e)
@@ -70,10 +78,11 @@ public class PollPanelBehaviour(IntPtr ptr) : MonoBehaviour(ptr)
                 PollPanel.Update();
 
                 _timeUntilNextPoll = Random.Range(30, 60);
-                if (timedAction != null)
+                var newTimedAction = currentAction as TimedAction;
+                if (newTimedAction != null)
                 {
-                    _timeUntilNextPoll = Math.Max(_timeUntilNextPoll, timedAction.Duration);
-                    timedAction.IsOngoing = true;
+                    _timeUntilNextPoll = Math.Max(_timeUntilNextPoll, newTimedAction.Duration);
+                    newTimedAction.IsOngoing = true;
                 }
             }
         }

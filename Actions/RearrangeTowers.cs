@@ -19,7 +19,7 @@ public class RearrangeTowers : StreamAction
     }
 
     /// <inheritdoc />
-    public override Rarity Weight => Rarity.Legendary;
+    protected override Rarity Weight => Rarity.Legendary;
 
     /// <inheritdoc />
     public override string ChoiceText => "Move each tower to a random position";
