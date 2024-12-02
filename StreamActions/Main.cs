@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using BTD_Mod_Helper.Api;
 using BTD_Mod_Helper.Api.Components;
 using BTD_Mod_Helper.Api.Enums;
 using Il2CppAssets.Scripts.Unity.UI_New;
@@ -32,7 +33,7 @@ using TaskScheduler = BTD_Mod_Helper.Api.TaskScheduler;
 namespace StreamActions;
 
 [HarmonyPatch]
-public partial class Main : BloonsTD6Mod
+public class Main : BloonsTD6Mod
 {
     internal static MelonLogger.Instance Logger;
 
@@ -44,6 +45,9 @@ public partial class Main : BloonsTD6Mod
         Logger = LoggerInstance;
         if(!Directory.Exists(CacheFolder))
             Directory.CreateDirectory(CacheFolder);
+
+        AppDomain.CurrentDomain.ProcessExit += (_, _) => OnApplicationQuit();
+        AppDomain.CurrentDomain.UnhandledException += (_, _) => OnApplicationQuit();
     }
 
     [HarmonyPatch(typeof(MainMenu), nameof(MainMenu.Start))]
@@ -118,4 +122,9 @@ public partial class Main : BloonsTD6Mod
         PollPanel.Create(__instance);
     }
 
+    /// <inheritdoc />
+    public override void OnApplicationQuit()
+    {
+        ModContent.GetInstance<YoutubePlatform>().KillSeleniumWrapper();
+    }
 }

@@ -15,6 +15,7 @@
         <Optimize>true</Optimize>
         <DebugType>none</DebugType>
     </PropertyGroup>
+    
     <ItemGroup>
         <None Include=".github\workflows\build.yml" />
     </ItemGroup>
@@ -26,6 +27,15 @@
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
     </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="../SeleniumWrapper/bin/Release/net9.0/win-x64/publish/SeleniumWrapper.exe" />
+    </ItemGroup>
     
     <Import Project="..\..\btd6.targets" />
+
+    <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+        <Message Text="Executing publish command..." Importance="high"/>
+        <Exec Command="dotnet publish -c Release -r win-x64 " WorkingDirectory="../SeleniumWrapper/" />
+    </Target>
 </Project>

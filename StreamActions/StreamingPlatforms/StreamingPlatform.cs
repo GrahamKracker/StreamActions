@@ -24,13 +24,11 @@ public abstract class StreamingPlatform : NamedModContent
 
     protected void SaveToCache()
     {
-        var lines = new List<string> { Name };
-        lines.AddRange(CacheData);
         if(Settings.SaveToken)
-            File.WriteAllLines(CacheFile, lines);
+            File.WriteAllLines(CacheFile, CacheData);
     }
 
-    protected string CacheFile => Path.Combine(CacheFolder, Name, ".txt");
+    protected string CacheFile => Path.Combine(CacheFolder, Name + ".txt");
 
     protected abstract bool LoadFromCacheData(string[] lines);
 

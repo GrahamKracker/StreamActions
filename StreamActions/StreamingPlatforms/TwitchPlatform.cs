@@ -68,7 +68,7 @@ public class TwitchPlatform : StreamingPlatform
     /// <inheritdoc />
     protected override bool LoadFromCacheData(string[] lines)
     {
-        InitClient(lines[1], lines[2]);
+        InitClient(lines[0], lines[1]);
         return true;
     }
 
@@ -83,7 +83,6 @@ public class TwitchPlatform : StreamingPlatform
     {
         const float height = 200;
         const float labelWidth = 300;
-        const float inputWidth = 1200;
 
         var channelPanel = rightMenu.AddPanel(new Info("ChannelPanel")
         {
