@@ -4,12 +4,14 @@ using System.IO;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using BTD_Mod_Helper.Api.Components;
 using BTD_Mod_Helper.Api.Enums;
 using Il2CppAssets.Scripts.Unity.Display;
 using Il2CppAssets.Scripts.Unity.UI_New.Popups;
 using Il2CppNinjaKiwi.Common.ResourceUtils;
+using NamedPipeWrapper;
 using UnityEngine;
 using UnityEngine.U2D;
 
@@ -57,21 +59,20 @@ public class YoutubePlatform : StreamingPlatform
 
             var seleniumWrapperFile = Path.Combine(CacheFolder, "SeleniumWrapper.exe");
 
-            var stream = this.mod.MelonAssembly.Assembly.GetEmbeddedResource("SeleniumWrapper.exe");
+            var wrapperResource = this.mod.MelonAssembly.Assembly.GetEmbeddedResource("SeleniumWrapper.exe");
 
             try
             {
                 await using var fileStream = File.Create(seleniumWrapperFile);
-                await stream.CopyToAsync(fileStream);
+                await wrapperResource.CopyToAsync(fileStream);
                 fileStream.Close();
-                stream.Close();
+                wrapperResource.Close();
             }
             catch (IOException)
             {
                 Main.Logger.Error("Failed to create SeleniumWrapper file.");
                 throw;
             }
-
 
             _seleniumWrapper = new Process
             {
@@ -88,27 +89,77 @@ public class YoutubePlatform : StreamingPlatform
             _seleniumWrapper.Start();
 
             Main.Logger.Msg("Started SeleniumWrapper");
-            var namedPipeClient = new NamedPipeClientStream(".", "SeleniumWrapper", PipeDirection.In, PipeOptions.Asynchronous);
+
+            /*var namedPipeClient =
+                new NamedPipeClientStream(".", "SeleniumWrapper", PipeDirection.InOut);
             await namedPipeClient.ConnectAsync();
+            namedPipeClient.ReadMode = PipeTransmissionMode.Message;
+
+            var pipeReader = new StreamReader(namedPipeClient, Encoding.UTF8, default, 1024, true);
 
             Main.Logger.Msg("Connected to SeleniumWrapper");
 
-            _ = Task.Factory.StartNew(async () =>
+            _ = Task.Factory.StartNew(() =>
             {
-                using var reader = new StreamReader(namedPipeClient, Encoding.UTF8, bufferSize: 2048, leaveOpen: true);
-
                 while (namedPipeClient.IsConnected)
                 {
-                    var serverMessage = await reader.ReadLineAsync();
+                    var message = pipeReader.ReadLine();
+                    if (message != null)
+                    {
+                        var split = message.Split(":", 2);
 
-                    if (string.IsNullOrEmpty(serverMessage) || serverMessage.ToLower().Equals("exit"))
-                        break;
-
-                    OnMessageReceived(serverMessage.Split(':')[0], serverMessage.Split(':')[1]);
+                        OnMessageReceived(split[0], split[1]);
+                    }
                 }
 
-                Main.Logger.Msg("Disconnected from youtube.");
-            }, TaskCreationOptions.LongRunning);
+                namedPipeClient.Dispose();
+                pipeReader.Dispose();
+
+                Main.Logger.Msg("Disconnected from YouTube.");
+            }, TaskCreationOptions.LongRunning);*/
+
+            /*var namedPipeClient =
+                new NamedPipeClientStream(".", "SeleniumWrapper", PipeDirection.InOut);
+            await namedPipeClient.ConnectAsync();
+            namedPipeClient.ReadMode = PipeTransmissionMode.Message;
+
+            var pipeReader = new StreamReader(namedPipeClient, Encoding.UTF8, default, 1024, true);*/
+
+            var client = new NamedPipeClient<PipeMessage>("SeleniumWrapper");
+            client.ServerMessage += OnServerMessage;
+            client.Error += OnError;
+            client.Start();
+
+            void OnServerMessage(NamedPipeConnection<PipeMessage, PipeMessage> connection, PipeMessage message)
+            {
+                OnMessageReceived(message.Author, message.Message);
+            }
+
+            void OnError(Exception exception)
+            {
+                Main.Logger.Error(exception);
+            }
+
+            Main.Logger.Msg("Connected to SeleniumWrapper");
+
+            /*_ = Task.Factory.StartNew(() =>
+            {
+                while (namedPipeClient.IsConnected)
+                {
+                    var message = pipeReader.ReadLine();
+                    if (message != null)
+                    {
+                        var split = message.Split(":", 2);
+
+                        OnMessageReceived(split[0], split[1]);
+                    }
+                }
+
+                namedPipeClient.Dispose();
+                pipeReader.Dispose();
+
+                Main.Logger.Msg("Disconnected from YouTube.");
+            }, TaskCreationOptions.LongRunning);*/
 
             PopupScreen.instance.SafelyQueue(p => { p.ShowOkPopup("Connected to YouTube video"); });
 
@@ -127,6 +178,7 @@ public class YoutubePlatform : StreamingPlatform
     {
         try
         {
+            Main.SendAnalytics(Main.AnalyticsAction.ManualYoutube);
             await SetupYoutube(VideoIdInput.InputField.text);
         }
         catch (Exception e)
@@ -148,6 +200,7 @@ public class YoutubePlatform : StreamingPlatform
     protected override bool LoadFromCacheData(string[] lines)
     {
         SetupYoutube(lines[0]).Wait();
+        Main.SendAnalytics(Main.AnalyticsAction.AutoYoutube);
         return true;
     }
 
@@ -176,4 +229,11 @@ public class YoutubePlatform : StreamingPlatform
     }
 
     ~YoutubePlatform() => KillSeleniumWrapper();
+
+    [Serializable]
+    public record PipeMessage(string Author, string Message)
+    {
+        public string Author = Author;
+        public string Message = Message;
+    }
 }

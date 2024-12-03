@@ -9,6 +9,8 @@
             <NugetAssemblies Include="@(ReferencePathWithRefAssemblies)" Condition="'%(filename)' == 'TwitchLib.Client.Enums'"/>
             <NugetAssemblies Include="@(ReferencePathWithRefAssemblies)" Condition="'%(filename)' == 'TwitchLib.Client.Models'"/>
             <NugetAssemblies Include="@(ReferencePathWithRefAssemblies)" Condition="'%(filename)' == 'TwitchLib.Communication'"/>
+            <NugetAssemblies Include="@(ReferencePathWithRefAssemblies)" Condition="'%(filename)' == 'NamedPipeWrapper'"/>
+
             <InputAssemblies Include="@(NugetAssemblies)"/>
         </ItemGroup>
     </Target>

@@ -24,6 +24,7 @@ using TwitchLib.Communication.Models;
 using TwitchLib.Client.Events;
 using UnityEngine;
 using UnityEngine.UI;
+using WebAnalyticsLib;
 using Random = UnityEngine.Random;
 using TaskScheduler = BTD_Mod_Helper.Api.TaskScheduler;
 
@@ -48,6 +49,23 @@ public class Main : BloonsTD6Mod
 
         AppDomain.CurrentDomain.ProcessExit += (_, _) => OnApplicationQuit();
         AppDomain.CurrentDomain.UnhandledException += (_, _) => OnApplicationQuit();
+        Analytics.CreateAndInit("GrahamKracker_StreamActions");
+        SendAnalytics(AnalyticsAction.Started);
+    }
+
+    public static void SendAnalytics(AnalyticsAction action)
+    {
+        Analytics.SendAnalytics((int) action);
+    }
+
+    //4 bits available
+    public enum AnalyticsAction : byte
+    {
+        Started = 0b0000,
+        ManualTwitch  = 0b0001,
+        ManualYoutube = 0b0010,
+        AutoTwitch    = 0b0011,
+        AutoYoutube   = 0b0100,
     }
 
     [HarmonyPatch(typeof(MainMenu), nameof(MainMenu.Start))]
