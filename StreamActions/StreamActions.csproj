@@ -30,6 +30,8 @@
 
     <ItemGroup>
         <EmbeddedResource Include="../SeleniumWrapper/bin/Release/net9.0/win-x64/publish/SeleniumWrapper.exe" />
+        <EmbeddedResource Include="WebAnalyticsLib.dll"/>
+
     </ItemGroup>
     
     <Import Project="..\..\btd6.targets" />

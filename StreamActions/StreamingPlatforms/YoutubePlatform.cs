@@ -7,8 +7,11 @@ using System.Text;
 using System.Threading.Tasks;
 using BTD_Mod_Helper.Api.Components;
 using BTD_Mod_Helper.Api.Enums;
+using Il2CppAssets.Scripts.Unity.Display;
 using Il2CppAssets.Scripts.Unity.UI_New.Popups;
+using Il2CppNinjaKiwi.Common.ResourceUtils;
 using UnityEngine;
+using UnityEngine.U2D;
 
 namespace StreamActions.StreamingPlatforms;
 
@@ -21,7 +24,7 @@ public class YoutubePlatform : StreamingPlatform
     public void KillSeleniumWrapper()
     {
         _seleniumWrapper?.Kill();
-        Process.GetProcessesByName("SeleniumWrapper").ForEach(p => p.Kill());
+        Process.GetProcessesByName("SeleniumWrapper").ForEach(p => p.Close());
     }
 
     private static bool IsFileLocked(string filePath)

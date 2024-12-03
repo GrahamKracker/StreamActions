@@ -28,7 +28,8 @@ class Program
                 _driver?.Quit();
             };
 
-            var namedPipe = new NamedPipeServerStream("SeleniumWrapper", PipeDirection.Out, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
+            var namedPipe = new NamedPipeServerStream("SeleniumWrapper", PipeDirection.Out, 1,
+                PipeTransmissionMode.Byte, PipeOptions.Asynchronous);
             await namedPipe.WaitForConnectionAsync().ConfigureAwait(false);
 
             var writer = new StreamWriter(namedPipe, Encoding.UTF8, bufferSize: 2048, leaveOpen: true);
@@ -71,49 +72,52 @@ class Program
 
             DevToolsSession devToolsSession = _driver.GetDevToolsSession();
 
-            var fetch = devToolsSession.GetVersionSpecificDomains<OpenQA.Selenium.DevTools.V131.DevToolsSessionDomains>().Network;
+            var fetch = devToolsSession
+                .GetVersionSpecificDomains<OpenQA.Selenium.DevTools.V131.DevToolsSessionDomains>().Network;
 
             _ = fetch.Enable(new EnableCommandSettings());
 
-            fetch.ResponseReceived += (_, e) =>
+            fetch.ResponseReceived += async (_, e) =>
             {
                 try
                 {
-                    if(!e.Response.Url.Contains("live_chat/get_live_chat"))
+                    if (!e.Response.Url.Contains("live_chat/get_live_chat"))
                         return;
 
-                    fetch.GetResponseBody(new GetResponseBodyCommandSettings()
+                    var body = (await fetch.GetResponseBody(new GetResponseBodyCommandSettings()
                     {
                         RequestId = e.RequestId
-                    }, default, null, false).ContinueWith(async task =>
+                    }, default, null, false)).Body;
+
+                    //try parse to JObject
+                    try
                     {
-                        var body = task.Result.Body;
-                        //try parse to JObject
-                        try
+                        var json = JsonNode.Parse(body)?.AsObject();
+                        var actions = json?["continuationContents"]?["liveChatContinuation"]?["actions"]?.AsArray();
+                        if (actions == null)
+                            return;
+                        foreach (var action in actions)
                         {
-                            var json = JsonNode.Parse(body)?.AsObject();
-                            var actions = json?["continuationContents"]?["liveChatContinuation"]?["actions"]?.AsArray();
-                            if (actions == null)
-                                return;
-                            foreach (var action in actions)
-                            {
-                                if (action == null)
-                                    continue;
+                            if (action == null)
+                                continue;
 
-                                var authorName = action["addChatItemAction"]?["item"]?["liveChatTextMessageRenderer"]?["authorName"]?["simpleText"];
-                                var message = action["addChatItemAction"]?["item"]?["liveChatTextMessageRenderer"]?["message"]?["runs"]?[0]?["text"];
-                                if (authorName == null || message == null) continue;
+                            var authorName =
+                                action["addChatItemAction"]?["item"]?["liveChatTextMessageRenderer"]?["authorName"]?[
+                                    "simpleText"];
+                            var message =
+                                action["addChatItemAction"]?["item"]?["liveChatTextMessageRenderer"]?["message"]?[
+                                    "runs"]?[0]?["text"];
+                            if (authorName == null || message == null) continue;
 
-                                Console.WriteLine(authorName + ": " + message);
-                                await writer.WriteLineAsync(authorName + ": " + message);
-                                await writer.FlushAsync();
-                            }
+                            Console.WriteLine(authorName + ": " + message);
+                            await writer.WriteLineAsync(authorName + ": " + message);
+                            await writer.FlushAsync();
                         }
-                        catch (JsonException)
-                        {
-                            // ignored
-                        }
-                    });
+                    }
+                    catch (JsonException)
+                    {
+                        // ignored
+                    }
                 }
                 catch (Exception exception)
                 {
