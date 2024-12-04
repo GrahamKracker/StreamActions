@@ -21,7 +21,8 @@
     </ItemGroup>
     
     <ItemGroup>
-        <PackageReference Include="NamedPipeWrapper" Version="1.5.0" />
+        <PackageReference Include="H.Formatters.Newtonsoft.Json" Version="14.0.0" />
+        <PackageReference Include="H.Pipes" Version="14.0.0" />
         <PackageReference Include="TwitchLib.Client" Version="3.3.1" />
         <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.34.2">
           <PrivateAssets>all</PrivateAssets>

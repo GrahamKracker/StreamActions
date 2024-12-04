@@ -9,7 +9,9 @@
             <NugetAssemblies Include="@(ReferencePathWithRefAssemblies)" Condition="'%(filename)' == 'TwitchLib.Client.Enums'"/>
             <NugetAssemblies Include="@(ReferencePathWithRefAssemblies)" Condition="'%(filename)' == 'TwitchLib.Client.Models'"/>
             <NugetAssemblies Include="@(ReferencePathWithRefAssemblies)" Condition="'%(filename)' == 'TwitchLib.Communication'"/>
-            <NugetAssemblies Include="@(ReferencePathWithRefAssemblies)" Condition="'%(filename)' == 'NamedPipeWrapper'"/>
+            <NugetAssemblies Include="@(ReferencePathWithRefAssemblies)" Condition="'%(filename)' == 'H.Pipes'"/>
+            <NugetAssemblies Include="@(ReferencePathWithRefAssemblies)" Condition="'%(filename)' == 'H.Formatters'"/>
+            <NugetAssemblies Include="@(ReferencePathWithRefAssemblies)" Condition="'%(filename)' == 'H.Formatters.Newtonsoft.Json'"/>
 
             <InputAssemblies Include="@(NugetAssemblies)"/>
         </ItemGroup>

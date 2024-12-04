@@ -13,7 +13,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="NamedPipeWrapper" Version="1.5.0" />
+      <PackageReference Include="H.Formatters.Newtonsoft.Json" Version="14.0.0" />
+      <PackageReference Include="H.Pipes" Version="14.0.0" />
       <PackageReference Include="Selenium.Support" Version="4.27.0" />
       <PackageReference Include="Selenium.WebDriver" Version="4.27.0" />
     </ItemGroup>

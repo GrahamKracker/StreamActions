@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using BTD_Mod_Helper.Api;
 using BTD_Mod_Helper.Api.Components;
+using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppNinjaKiwi.Common.ResourceUtils;
 
 namespace StreamActions.StreamingPlatforms;
@@ -18,24 +19,32 @@ public abstract class StreamingPlatform : NamedModContent
         ChannelsAnswered.Clear();
     }
 
+    public virtual int Priority => 0;
+
     public abstract void ConnectToPlatform();
 
     protected abstract string[] CacheData { get; }
 
     protected void SaveToCache()
     {
-        if(Settings.SaveToken)
+        if(Settings.SaveToCache)
             File.WriteAllLines(CacheFile, CacheData);
     }
 
-    protected string CacheFile => Path.Combine(CacheFolder, Name + ".txt");
+    protected virtual void OnMessageReceived(string author, string message)
+    {
+        if ((InGame.instance == null || !InGame.instance.IsInGame()) || ChannelsAnswered.Add(author))
+            ChatMessageReceived(message);
+    }
+
+    protected virtual string CacheFile => Path.Combine(CacheFolder, Name + ".txt");
 
     protected abstract bool LoadFromCacheData(string[] lines);
 
     public bool LoadFromCache()
     {
         string[] lines;
-        if(Settings.SaveToken && File.Exists(CacheFile) && (lines = File.ReadAllLines(CacheFile)).Any())
+        if(Settings.SaveToCache && File.Exists(CacheFile) && (lines = File.ReadAllLines(CacheFile)).Any())
             return LoadFromCacheData(lines);
         return false;
     }

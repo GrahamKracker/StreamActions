@@ -78,9 +78,9 @@ public class Main : BloonsTD6Mod
     /// <inheritdoc />
     public override void OnTitleScreen()
     {
-        if (Settings.SaveToken)
+        if (Settings.SaveToCache)
         {
-            foreach (var streamingPlatform in StreamingPlatform.Platforms)
+            foreach (var streamingPlatform in StreamingPlatform.Platforms.OrderBy(x=>x.Priority))
             {
                 if(streamingPlatform.LoadFromCache())
                     return;
@@ -91,7 +91,6 @@ public class Main : BloonsTD6Mod
     public static void ChatMessageReceived(string chatMessage)
     {
         MelonLogger.Msg("received: " + chatMessage);
-        Regex regex = new(@"^([1-4])\1*$");
 
         int charPos = 0;
         char cToCheck = chatMessage[0];
@@ -103,24 +102,15 @@ public class Main : BloonsTD6Mod
         {
             if (chatMessage[charPos] != cToCheck)
             {
-                MelonLogger.Msg("not match");
                 return;
             }
             charPos++;
         }
 
-        //if (regex.IsMatch(chatMessage))
+        if (int.TryParse(chatMessage[0].ToString(), out int i) && i is >= 1 and <= 4)
         {
-            MelonLogger.Warning("is match");
-            if (int.TryParse(chatMessage[0].ToString(), out int i) && i is >= 1 and <= 4)
-            {
-                Votes[i]++;
-            }
+            Votes[i]++;
         }
-        /*else
-        {
-            MelonLogger.Msg("not match");
-        }*/
     }
 
     public static Dictionary<int, StreamAction> ActionOptions { get; } = new();

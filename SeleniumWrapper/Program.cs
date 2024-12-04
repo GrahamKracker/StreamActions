@@ -3,7 +3,8 @@ using System.IO.Pipes;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using NamedPipeWrapper;
+using H.Formatters;
+using H.Pipes;
 using OpenQA.Selenium;
 using OpenQA.Selenium.DevTools;
 using OpenQA.Selenium.DevTools.V131.Network;
@@ -21,68 +22,44 @@ class Program
         {
             AppDomain.CurrentDomain.ProcessExit += (_, _) =>
             {
-                File.WriteAllText(Path.Combine(args[0] + "exit.txt"), "exit at " + DateTime.Now.ToString("HH:mm:ss"));
-                _driver?.Close();
                 _driver?.Quit();
             };
             AppDomain.CurrentDomain.UnhandledException += (_, _) =>
             {
-                File.WriteAllText(Path.Combine(args[0] + "exit.txt"), "exit at " + DateTime.Now.ToString("HH:mm:ss"));
-                _driver?.Close();
+                File.WriteAllText(Path.Combine(args[0] + "error.txt"), "exit at " + DateTime.Now.ToString("HH:mm:ss"));
                 _driver?.Quit();
             };
 
-            var server = new NamedPipeServer<PipeMessage>("SeleniumWrapper");
-            server.ClientConnected += OnClientConnected;
-            server.ClientDisconnected += OnClientDisconnected;
-            server.ClientMessage += OnClientMessage;
-            server.Error += OnError;
-            server.Start();
+            var server = new PipeServer<PipeMessage>("SeleniumWrapper", formatter: new NewtonsoftJsonFormatter());
 
-            void OnClientConnected(NamedPipeConnection<PipeMessage, PipeMessage> connection)
+            server.ClientConnected +=  (o, args) =>
             {
-                Console.WriteLine("Client connected");
-            }
-
-            void OnClientDisconnected(NamedPipeConnection<PipeMessage, PipeMessage> connection)
+                Console.WriteLine($"Client {args.Connection.PipeName} is now connected!");
+            };
+            server.ClientDisconnected += (o, args) =>
             {
-                Console.WriteLine("Client disconnected");
-            }
-            
-            void OnClientMessage(NamedPipeConnection<PipeMessage, PipeMessage> connection, PipeMessage message)
+                Console.WriteLine($"Client {args.Connection.PipeName} disconnected");
+            };
+            server.MessageReceived += (sender, args) =>
             {
-                Console.WriteLine("Client message");
-            }
+                Console.WriteLine($"Client {args.Connection.PipeName} says: {args.Message}");
+            };
+            server.ExceptionOccurred += (o, args) => Console.WriteLine(args.Exception);
 
-            void OnError(Exception exception)
-            {
-                Console.WriteLine(exception.ToString());
-            }
+            await server.StartAsync();
 
-
-            /* var namedPipe = new NamedPipeServerStream("SeleniumWrapper", PipeDirection.InOut, 1,
-                PipeTransmissionMode.Message);
-            await namedPipe.WaitForConnectionAsync();
-
-
-            var pipeWriter = new StreamWriter(namedPipe, Encoding.UTF8)
-            {
-                AutoFlush = true
-            };*/
-
-
-            var CacheFolder = args[0];
+            var cacheFolder = args[0];
             var url = args[1];
 
             using HttpClient client = new();
 
-            if (!File.Exists(Path.Combine(CacheFolder, "edgedriver_win64", "msedgedriver.exe")))
+            if (!File.Exists(Path.Combine(cacheFolder, "edgedriver_win64", "msedgedriver.exe")))
             {
                 var response =
                     await client.GetAsync("https://msedgedriver.azureedge.net/131.0.2903.70/edgedriver_win64.zip");
                 await using var stream = await response.Content.ReadAsStreamAsync();
 
-                await using var fileStream = File.Create(Path.Combine(CacheFolder, "edgedriver_win64.zip"));
+                await using var fileStream = File.Create(Path.Combine(cacheFolder, "edgedriver_win64.zip"));
 
                 await stream.CopyToAsync(fileStream);
 
@@ -90,12 +67,12 @@ class Program
 
                 //extract the zip
 
-                ZipFile.ExtractToDirectory(Path.Combine(CacheFolder, "edgedriver_win64.zip"),
-                    Path.Combine(CacheFolder, "edgedriver_win64"));
+                ZipFile.ExtractToDirectory(Path.Combine(cacheFolder, "edgedriver_win64.zip"),
+                    Path.Combine(cacheFolder, "edgedriver_win64"));
 
-                File.Delete(Path.Combine(CacheFolder, "edgedriver_win64.zip"));
+                File.Delete(Path.Combine(cacheFolder, "edgedriver_win64.zip"));
 
-                Directory.Delete(Path.Combine(CacheFolder, "edgedriver_win64", "Driver_Notes"), true);
+                Directory.Delete(Path.Combine(cacheFolder, "edgedriver_win64", "Driver_Notes"), true);
             }
 
             var options = new EdgeOptions();
@@ -105,7 +82,7 @@ class Program
             options.AddArgument("--no-sandbox");
             options.AddArgument("--headless");*/
 
-            _driver = new EdgeDriver(Path.Combine(CacheFolder, "edgedriver_win64", "msedgedriver.exe"), options);
+            _driver = new EdgeDriver(Path.Combine(cacheFolder, "edgedriver_win64", "msedgedriver.exe"), options);
 
             var devToolsSession = _driver.GetDevToolsSession();
             var fetch = devToolsSession
@@ -113,7 +90,7 @@ class Program
 
             _ = fetch.Enable(new EnableCommandSettings());
 
-            fetch.ResponseReceived += (_, e) =>
+            fetch.ResponseReceived += async (_, e) =>
             {
                 try
                 {
@@ -156,12 +133,7 @@ class Program
                                     "runs"]?[0]?["text"];
                             if (authorName == null || message == null) continue;
 
-                            Console.WriteLine(authorName + ": " + message);
-                            /*pipeWriter.WriteLine(authorName + ": " + message);
-
-                            namedPipe.WaitForPipeDrain();*/
-
-                            server.PushMessage(new PipeMessage(authorName.ToString(), message.ToString()));
+                            await server.WriteAsync(new PipeMessage(authorName.ToString(), message.ToString()));
                         }
                     }
                     catch (JsonException)
@@ -177,6 +149,19 @@ class Program
 
             await _driver.Navigate().GoToUrlAsync(url);
 
+            try
+            {
+                await Task.Delay(4000);
+                _driver.FindElement(By.XPath("//*[@id=\"label-text\"]")).Click();
+                await Task.Delay(500);
+                _driver.FindElement(By.XPath("/html/body/yt-live-chat-app/div/yt-live-chat-renderer/iron-pages/div/yt-live-chat-header-renderer/div[1]/span[2]/yt-sort-filter-sub-menu-renderer/yt-dropdown-menu/tp-yt-paper-menu-button/tp-yt-iron-dropdown/div/div/tp-yt-paper-listbox/a[2]/tp-yt-paper-item")).Click();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+
+
             await Task.Delay(Timeout.Infinite);
         }
         catch (Exception e)
@@ -185,10 +170,11 @@ class Program
         }
     }
 
-    [Serializable]
-    public record PipeMessage(string Author, string Message)
+    private record PipeMessage(string Author, string Message)
     {
         public string Author = Author;
         public string Message = Message;
     }
+
+    ~Program() => _driver?.Quit();
 }

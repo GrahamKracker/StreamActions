@@ -23,6 +23,9 @@ public class TwitchPlatform : StreamingPlatform
     private ModHelperInputField ChannelInput { get; set; } = null!;
 
     /// <inheritdoc />
+    public override int Priority => -1;
+
+    /// <inheritdoc />
     public override void ConnectToPlatform()
     {
         Main.SendAnalytics(Main.AnalyticsAction.ManualTwitch);
@@ -49,7 +52,7 @@ public class TwitchPlatform : StreamingPlatform
 
             {
                 client.Connect();
-                if (Settings.SaveToken)
+                if (Settings.SaveToCache)
                 {
                     SaveToCache();
                 }
@@ -76,8 +79,7 @@ public class TwitchPlatform : StreamingPlatform
 
     private void Client_OnMessageReceived(object? sender, OnMessageReceivedArgs e)
     {
-        if(ChannelsAnswered.Add(e.ChatMessage.Channel))
-            ChatMessageReceived(e.ChatMessage.Message);
+        OnMessageReceived(e.ChatMessage.Channel, e.ChatMessage.Message);
     }
 
     /// <inheritdoc />
