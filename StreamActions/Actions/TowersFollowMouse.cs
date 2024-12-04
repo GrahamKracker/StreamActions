@@ -62,7 +62,7 @@ public class TowersFollowMouse : StreamAction
     protected override bool? IsPositiveEffect => null;
 
     /// <inheritdoc />
-    protected override void BeforeVoting(Random rand)
+    protected internal override void BeforeVoting(Random rand)
     {
 
     }

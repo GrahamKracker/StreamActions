@@ -24,7 +24,7 @@ public class SendNextRounds : StreamAction
     protected override bool? IsPositiveEffect => false;
 
     /// <inheritdoc />
-    protected override void BeforeVoting(Random rand)
+    protected internal override void BeforeVoting(Random rand)
     {
         RoundsToSend = 1;
         for(int i=0; i<9; i++)

@@ -1,4 +1,4 @@
-﻿namespace StreamActions;
+﻿namespace StreamActions.Actions.TimedActions;
 
 public abstract class TimedAction : StreamAction
 {
@@ -7,5 +7,5 @@ public abstract class TimedAction : StreamAction
 
     public bool IsOngoing { get; set; } = false;
 
-    public abstract int Duration { get; }
+    public int Duration { get; protected set; } = -1;
 }

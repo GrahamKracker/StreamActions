@@ -12,7 +12,7 @@ public class GiveRandomCashAmount : StreamAction
     }
 
     /// <inheritdoc />
-    protected override void BeforeVoting(Random rand)
+    protected internal override void BeforeVoting(Random rand)
     {
         var roundMult = (InGame.Bridge.GetCurrentRound() + 1) * .25f; //TODO find a fair algorithm
         CashAmount = rand.Next((int)(100 * roundMult), (int)(1000 * roundMult));

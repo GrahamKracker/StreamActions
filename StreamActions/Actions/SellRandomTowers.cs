@@ -30,7 +30,7 @@ public class SellRandomTowers : StreamAction
     protected override bool? IsPositiveEffect => false;
 
     /// <inheritdoc />
-    protected override void BeforeVoting(Random rand)
+    protected internal override void BeforeVoting(Random rand)
     {
         TowersToSell = 1;
         for (int i = 0; i < 5; i++)

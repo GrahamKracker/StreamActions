@@ -67,7 +67,7 @@ public class UpgradeNextRoundBloons : StreamAction
     protected override bool? IsPositiveEffect => false;
 
     /// <inheritdoc />
-    protected override void BeforeVoting(Random rand)
+    protected internal override void BeforeVoting(Random rand)
     {
     }
 }

@@ -57,7 +57,7 @@ public static class PollPanel
         if(!DoTextsExist()) return;
 
         int i = 0;
-        foreach (var streamAction in Main.ActionOptions.Values)
+        foreach (var streamAction in ActionOptions.Values)
         {
             Texts[i].SetText($"{i + 1}:  {streamAction.ChoiceText} ({Votes[i + 1]} votes)");
             Texts[i].Text.color = streamAction.ChoiceColor;
@@ -70,7 +70,7 @@ public static class PollPanel
         if (Texts.Any(x => x == null))
             return;
 
-        foreach ((int index, int amount) in Main.Votes)
+        foreach ((int index, int amount) in Votes)
         {
             int i = index - 1;
             var text = Texts[i].Text.text;
@@ -90,7 +90,7 @@ public static class PollPanel
             _timeText.SetText($"{Math.Floor(timeUntil)}s left of voting");
     }
 
-    public static void UpdateTimeLeft(float timeLeft, TimedAction timedAction)
+    public static void UpdateTimeLeft(float timeLeft)
     {
         if (_timeLeftText != null)
         {

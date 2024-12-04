@@ -48,14 +48,13 @@ public class LockRandomTower : TimedAction
     protected override bool? IsPositiveEffect => false;
 
     /// <inheritdoc />
-    protected override void BeforeVoting(Random rand)
+    protected internal override void BeforeVoting(Random rand)
     {
         var validTowers = InGame.instance.GetGameModel().towers.Where(tower=>
             !tower.name.Contains("Transformed", StringComparison.InvariantCultureIgnoreCase) &&
             tower.IsStandardTower() && tower is { isSubTower: false, isGeraldoItem: false, isPowerTower: false, IsBaseTower: true }).ToList();
         TowerToLock = validTowers[rand.Next(0, validTowers.Count)].baseId;
-    }
 
-    /// <inheritdoc />
-    public override int Duration => 30;
+        Duration = rand.Next(20, 40);
+    }
 }

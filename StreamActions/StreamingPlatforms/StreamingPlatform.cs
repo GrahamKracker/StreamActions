@@ -55,7 +55,7 @@ public abstract class StreamingPlatform : NamedModContent
     /// <summary>
     /// If you're not going to use a custom .png for your Icon, use this to directly control its SpriteReference
     /// </summary>
-    public virtual SpriteReference IconReference => this.GetSpriteReferenceOrDefault(this.Icon);
+    public virtual SpriteReference IconReference => GetSpriteReferenceOrDefault(Icon);
 
     /// <inheritdoc />
     public override void Register()

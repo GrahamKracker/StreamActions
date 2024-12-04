@@ -57,7 +57,7 @@ public class PlatformSelectionPanel(IntPtr ptr) : ModHelperComponent(ptr)
 
         var panel = platform.AddButton(new Info("MainButton", InfoPreset.FillParent), VanillaSprites.MainBGPanelBlue, null);
 
-        panel.AddImage(new Info("Icon", 100, 0, 250, new Vector2(0, 0.5f)),
+        panel.AddImage(new Info("Icon", 100, 0, 200, new Vector2(0, 0.5f)),
             VanillaSprites.UiGradient);
 
         panel.AddText(new Info("Name", 1000, 150, new Vector2(.5f, 0.5f)), "Name",

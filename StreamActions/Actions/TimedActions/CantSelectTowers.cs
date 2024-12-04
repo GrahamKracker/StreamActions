@@ -31,7 +31,10 @@ public class CantSelectTowers : TimedAction
     protected override bool? IsPositiveEffect => false;
 
     /// <inheritdoc />
-    protected override void BeforeVoting(Random rand) { }
+    protected internal override void BeforeVoting(Random rand)
+    {
+        Duration = rand.Next(20, 40);
+    }
 
     /// <inheritdoc />
     public override void OnEnd()
@@ -42,7 +45,4 @@ public class CantSelectTowers : TimedAction
         }
         _towersToRenable.Clear();
     }
-
-    /// <inheritdoc />
-    public override int Duration => 30;
 }

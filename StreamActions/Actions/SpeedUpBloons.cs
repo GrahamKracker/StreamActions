@@ -34,7 +34,7 @@ public class SpeedUpBloons : StreamAction
     protected override bool? IsPositiveEffect => false;
 
     /// <inheritdoc />
-    protected override void BeforeVoting(Random rand)
+    protected internal override void BeforeVoting(Random rand)
     {
         PercentageSpeedUp = rand.Next(1 + (InGame.instance.GetSimulation().GetCurrentRound() / 2), 50 + InGame.instance.GetSimulation().GetCurrentRound());
     }

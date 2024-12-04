@@ -2,11 +2,17 @@
 using BTD_Mod_Helper.Api.Components;
 using BTD_Mod_Helper.Api.Enums;
 using Il2CppAssets.Scripts.Unity.Menu;
+using Il2CppAssets.Scripts.Unity.UI_New.InGame;
+using Il2CppAssets.Scripts.Utils;
 using Il2CppInterop.Runtime;
 using Il2CppTMPro;
+using MelonLoader.ICSharpCode.SharpZipLib;
+using StreamActions.Actions;
+using StreamActions.Actions.TimedActions;
 using StreamActions.StreamingPlatforms;
 using StreamActions.UI.Menus;
 using UnityEngine;
+using UnityEngine.InputSystem.Utilities;
 using Random = UnityEngine.Random;
 
 namespace StreamActions.UI.Behaviors;
@@ -17,50 +23,55 @@ public class PollPanelBehaviour(IntPtr ptr) : MonoBehaviour(ptr)
     private float _timeUntilNextPoll;
     private float _lastVoteUpdate;
     private const float VoteUpdateCooldown = .5f;
-    private StreamAction? currentAction;
+    private StreamAction? _currentAction;
     private float _timeSinceLastActionStart;
 
     private void Start()
     {
-        StreamAction.RandomizeActionOptions();
+        RandomizeActionOptions();
         PollPanel.Update();
         _timeUntilNextPoll = Random.Range(30, 60);
     }
 
+    private float GetDeltaTime()
+    {
+        if(TimeManager.gamePaused && Settings.PausePollsOnPause)
+            return 0;
+        return Settings.ScalePollCountDown ? Time.deltaTime : Time.unscaledDeltaTime;
+    }
+
     private void Update()
     {
-        _timeUntilNextPoll -= Settings.ScalePollCountDown ? Time.deltaTime : Time.unscaledDeltaTime;
-        _timeSinceLastActionStart += Settings.ScalePollCountDown ? Time.deltaTime : Time.unscaledDeltaTime;
+        _timeUntilNextPoll -= GetDeltaTime();
+        _timeSinceLastActionStart += GetDeltaTime();
         PollPanel.UpdateTimeUntil(_timeUntilNextPoll);
 
 
-        var timedAction = currentAction as TimedAction;
-        if (timedAction is { IsOngoing: true })
+        if (_currentAction is TimedAction { IsOngoing: true } timedAction)
         {
             timedAction.OnUpdate();
-            PollPanel.UpdateTimeLeft(timedAction.Duration - _timeSinceLastActionStart, timedAction);
+            if(timedAction.Duration == -1)
+                throw new InvalidOperationException("Duration not set for timed action: " + timedAction.DisplayName);
+            PollPanel.UpdateTimeLeft(timedAction.Duration - _timeSinceLastActionStart);
             if (_timeSinceLastActionStart > timedAction.Duration)
             {
                 timedAction.OnEnd();
                 timedAction.IsOngoing = false;
-                currentAction = null;
+                _currentAction = null;
                 _timeSinceLastActionStart = 0;
                 PollPanel.SetTimeLeftActive(false);
             }
         }
 
-
-
-
         if (_timeUntilNextPoll <= 0)
         {
-            if (ActionOptions.TryGetValue(Votes.MaxBy(y => y.Value).Key, out currentAction))
+            if (ActionOptions.TryGetValue(Votes.MaxBy(y => y.Value).Key, out _currentAction))
             {
                 try
                 {
-                    currentAction.OnChosen();
+                    _currentAction.OnChosen();
                     _timeSinceLastActionStart = 0;
-                    MelonLogger.Msg("Activated action: " + currentAction.ChoiceText);
+                    MelonLogger.Msg("Activated action: " + _currentAction.ChoiceText);
                 }
                 catch (Exception e)
                 {
@@ -77,11 +88,11 @@ public class PollPanelBehaviour(IntPtr ptr) : MonoBehaviour(ptr)
                     streamingPlatform.OnNewPoll();
                 }
 
-                StreamAction.RandomizeActionOptions();
+                RandomizeActionOptions();
                 PollPanel.Update();
 
                 _timeUntilNextPoll = Random.Range(30, 60);
-                if (currentAction is TimedAction newTimedAction)
+                if (_currentAction is TimedAction newTimedAction)
                 {
                     _timeUntilNextPoll = Math.Max(_timeUntilNextPoll, newTimedAction.Duration);
                     newTimedAction.IsOngoing = true;
@@ -94,6 +105,35 @@ public class PollPanelBehaviour(IntPtr ptr) : MonoBehaviour(ptr)
         {
             PollPanel.UpdateVotes();
             _lastVoteUpdate = Time.time;
+        }
+    }
+
+    private void RandomizeActionOptions()
+    {
+        ActionOptions.Clear();
+        int i = 1;
+        while (i <= 4)
+        {
+            var num = StreamAction.Random.Next(0, StreamAction.TotalWeight);
+            var action = StreamAction.Weights.First(x => num >= x.Key.Item1 && num < x.Key.Item2).Value;
+            if (ActionOptions.ContainsValue(action) || _currentAction == action) //todo: poor patch to alleviate bad design choices leading to data leaking over multiple polls
+                                                                                 //todo: in the future, refactor to use new instances of each action instead, although weighted list may need to be overhauled due to reliance on mod helper's singleton modcontent system
+            {
+                continue;
+            }
+
+            try
+            {
+                action.BeforeVoting(StreamAction.Random);
+            }
+            catch (Exception e)
+            {
+                MelonLogger.Error(e);
+                continue;
+            }
+
+            ActionOptions[i] = action;
+            i++;
         }
     }
 }

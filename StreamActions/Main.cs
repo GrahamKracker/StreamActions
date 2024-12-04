@@ -14,6 +14,7 @@ using Il2CppAssets.Scripts.Unity.UI_New.Utils;
 using Il2CppTMPro;
 using MelonLoader.Utils;
 using StreamActions;
+using StreamActions.Actions;
 using StreamActions.StreamingPlatforms;
 using StreamActions.UI;
 using TwitchLib.Client;
@@ -36,14 +37,14 @@ namespace StreamActions;
 [HarmonyPatch]
 public class Main : BloonsTD6Mod
 {
-    internal static MelonLogger.Instance Logger;
+    internal static MelonLogger.Instance ModLogger;
 
     private static readonly string ModFolder = Path.Combine(MelonEnvironment.ModsDirectory, "StreamActions");
     public static readonly string CacheFolder = Path.Combine(ModFolder, "Cache");
 
     public override void OnInitialize()
     {
-        Logger = LoggerInstance;
+        ModLogger = LoggerInstance;
         if(!Directory.Exists(CacheFolder))
             Directory.CreateDirectory(CacheFolder);
 
@@ -80,7 +81,7 @@ public class Main : BloonsTD6Mod
     {
         if (Settings.SaveToCache)
         {
-            foreach (var streamingPlatform in StreamingPlatform.Platforms.OrderBy(x=>x.Priority))
+            foreach (var streamingPlatform in StreamingPlatform.Platforms.OrderBy(x=>x.Priority)) //todo: save only the last streaming platform, and enforce only one active at once
             {
                 if(streamingPlatform.LoadFromCache())
                     return;

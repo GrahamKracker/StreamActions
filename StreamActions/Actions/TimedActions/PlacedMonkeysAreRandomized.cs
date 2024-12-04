@@ -28,9 +28,9 @@ public class PlacedMonkeysAreRandomized : TimedAction
     protected override bool? IsPositiveEffect => null;
 
     /// <inheritdoc />
-    protected override void BeforeVoting(Random rand)
+    protected internal override void BeforeVoting(Random rand)
     {
-
+        Duration = rand.Next(10, 30);
     }
 
 
@@ -41,9 +41,6 @@ public class PlacedMonkeysAreRandomized : TimedAction
     }
 
     private static bool IsActive { get; set; }
-
-    /// <inheritdoc />
-    public override int Duration => 20;
 
     [HarmonyPatch(typeof(InputManager), nameof(InputManager.TryPlace))]
     [HarmonyPrefix]

@@ -77,10 +77,11 @@ class Program
 
             var options = new EdgeOptions();
 
-            /*options.AddArgument("--disable-extensions");
+            options.AddArgument("--disable-extensions");
             options.AddArgument("--disable-gpu");
             options.AddArgument("--no-sandbox");
-            options.AddArgument("--headless");*/
+            options.AddArgument("--headless");
+
 
             _driver = new EdgeDriver(Path.Combine(cacheFolder, "edgedriver_win64", "msedgedriver.exe"), options);
 
@@ -111,7 +112,6 @@ class Program
                     {
                         return;
                     }
-
 
                     //try parse to JObject
                     try
@@ -149,6 +149,8 @@ class Program
 
             await _driver.Navigate().GoToUrlAsync(url);
 
+            //todo: detect if livestream is actually running and if not, cancel and return, telling the mod that it doesnt exist too
+
             try
             {
                 await Task.Delay(4000);
@@ -172,7 +174,9 @@ class Program
 
     private record PipeMessage(string Author, string Message)
     {
+        // ReSharper disable once UnusedMember.Local
         public string Author = Author;
+        // ReSharper disable once UnusedMember.Local
         public string Message = Message;
     }
 

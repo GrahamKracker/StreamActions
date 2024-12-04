@@ -1,24 +1,18 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Pipes;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using BTD_Mod_Helper.Api.Components;
 using BTD_Mod_Helper.Api.Enums;
 using H.Formatters;
 using H.Pipes;
-using Il2CppAssets.Scripts.Unity.Display;
-using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppAssets.Scripts.Unity.UI_New.Popups;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace StreamActions.StreamingPlatforms;
 
-
-public class YoutubePlatform : StreamingPlatform
+public class  YoutubePlatform : StreamingPlatform
 {
     private ModHelperInputField VideoIdInput { get; set; } = null!;
     private Process? _seleniumWrapper;
@@ -28,7 +22,7 @@ public class YoutubePlatform : StreamingPlatform
         _seleniumWrapper?.Kill();
         Process.GetProcessesByName("SeleniumWrapper").ForEach(p =>
         {
-            Main.Logger.Msg("Killing SeleniumWrapper process");
+            ModLogger.Msg("Killing SeleniumWrapper process");
             p.Close();
         });
     }
@@ -65,7 +59,7 @@ public class YoutubePlatform : StreamingPlatform
 
             var seleniumWrapperFile = Path.Combine(CacheFolder, "SeleniumWrapper.exe");
 
-            var wrapperResource = this.mod.MelonAssembly.Assembly.GetEmbeddedResource("SeleniumWrapper.exe");
+            var wrapperResource = mod.MelonAssembly.Assembly.GetEmbeddedResource("SeleniumWrapper.exe");
 
             try
             {
@@ -76,7 +70,7 @@ public class YoutubePlatform : StreamingPlatform
             }
             catch (IOException)
             {
-                Main.Logger.Error("Failed to create SeleniumWrapper file.");
+                ModLogger.Error("Failed to create SeleniumWrapper file.");
                 throw;
             }
 
@@ -94,7 +88,7 @@ public class YoutubePlatform : StreamingPlatform
 
             _seleniumWrapper.Start();
 
-            Main.Logger.Msg("Starting SeleniumWrapper exe");
+            ModLogger.Msg("Starting SeleniumWrapper exe");
 
             var client = new PipeClient<PipeMessage>("SeleniumWrapper", formatter:new NewtonsoftJsonFormatter());
             client.MessageReceived += (o, args) =>
@@ -104,15 +98,15 @@ public class YoutubePlatform : StreamingPlatform
             };
             client.Disconnected += (o, args) =>
             {
-                Main.Logger.Warning("Disconnected from SeleniumWrapper named pipe");
+                ModLogger.Warning("Disconnected from SeleniumWrapper named pipe");
                 PopupScreen.instance.SafelyQueue(p => { p.ShowOkPopup("Disconnected from YouTube video"); });
                 KillSeleniumWrapper();
             };
-            client.Connected += (o, args) => Main.Logger.Msg("Connected to SeleniumWrapper named pipe");
+            client.Connected += (o, args) => ModLogger.Msg("Connected to SeleniumWrapper named pipe");
             client.ExceptionOccurred += (o, args) =>
             {
-                Main.Logger.Error("Exception occurred in SeleniumWrapper while trying to send data through the named pipe");
-                Main.Logger.Error(args.Exception.ToString());
+                ModLogger.Error("Exception occurred in SeleniumWrapper while trying to send data through the named pipe");
+                ModLogger.Error(args.Exception.ToString());
                 PopupScreen.instance.SafelyQueue(p => { p.ShowOkPopup("Failure in the connection to YouTube video"); });
                 KillSeleniumWrapper();
             };
@@ -128,7 +122,7 @@ public class YoutubePlatform : StreamingPlatform
         }
         catch (Exception e)
         {
-            Main.Logger.Error(e);
+            ModLogger.Error(e);
         }
     }
 
@@ -136,12 +130,12 @@ public class YoutubePlatform : StreamingPlatform
     {
         try
         {
-            Main.SendAnalytics(Main.AnalyticsAction.ManualYoutube);
+            SendAnalytics(AnalyticsAction.ManualYoutube);
             await SetupYoutube(VideoIdInput.InputField.text);
         }
         catch (Exception e)
         {
-            Main.Logger.Error(e);
+            ModLogger.Error(e);
         }
     }
 
@@ -152,7 +146,7 @@ public class YoutubePlatform : StreamingPlatform
     protected override bool LoadFromCacheData(string[] lines)
     {
         SetupYoutube(lines[0]).Wait();
-        Main.SendAnalytics(Main.AnalyticsAction.AutoYoutube);
+        SendAnalytics(AnalyticsAction.AutoYoutube);
         return true;
     }
 
@@ -177,7 +171,7 @@ public class YoutubePlatform : StreamingPlatform
             VanillaSprites.BlueInsertPanelRound, null, 65);
 
         rightMenu.AddButton(new Info("ConnectButton", 600, 250), VanillaSprites.GreenBtnLong,
-            new System.Action(ConnectToPlatform)).AddText(new Info("Text", InfoPreset.FillParent), "Connect", 69);
+            new Action(ConnectToPlatform)).AddText(new Info("Text", InfoPreset.FillParent), "Connect", 69);
     }
 
     ~YoutubePlatform() => KillSeleniumWrapper();
