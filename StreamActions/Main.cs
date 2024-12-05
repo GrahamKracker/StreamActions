@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BTD_Mod_Helper.Api;
@@ -42,7 +43,7 @@ public class Main : BloonsTD6Mod
     private static readonly string ModFolder = Path.Combine(MelonEnvironment.ModsDirectory, "StreamActions");
     public static readonly string CacheFolder = Path.Combine(ModFolder, "Cache");
 
-    public override void OnInitialize()
+    public override void OnLateInitializeMelon()
     {
         ModLogger = LoggerInstance;
         if(!Directory.Exists(CacheFolder))
@@ -50,13 +51,29 @@ public class Main : BloonsTD6Mod
 
         AppDomain.CurrentDomain.ProcessExit += (_, _) => OnApplicationQuit();
         AppDomain.CurrentDomain.UnhandledException += (_, _) => OnApplicationQuit();
+
+        if (_hasAnalytics = AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetName().Name == "WebAnalyticsLib"))
+            InitAnalytics();
+    }
+
+    private static bool _hasAnalytics;
+
+    private static void InitAnalytics()
+    {
         Analytics.CreateAndInit("GrahamKracker_StreamActions");
         SendAnalytics(AnalyticsAction.Started);
     }
 
     public static void SendAnalytics(AnalyticsAction action)
     {
-        Analytics.SendAnalytics((int) action);
+        //check if WebAnalyticsLib dll is available
+        if(_hasAnalytics)
+            SendAnalytics((int) action);
+    }
+
+    private static void SendAnalytics(int action)
+    {
+        Analytics.SendAnalytics(action);
     }
 
     //4 bits available
