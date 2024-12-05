@@ -1,4 +1,5 @@
-﻿using BTD_Mod_Helper.Api;
+﻿using System.Globalization;
+using BTD_Mod_Helper.Api;
 using BTD_Mod_Helper.Api.Helpers;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppAssets.Scripts.Utils;
@@ -26,7 +27,7 @@ public class SpeedUpGame : TimedAction
     protected override Rarity Weight => Rarity.Common;
 
     /// <inheritdoc />
-    public override string ChoiceText => $"Lock the game speed to {Speed}x for {Duration}s";
+    public override string ChoiceText => $"Lock the game speed to {Speed:N2}x for {Duration}s";
 
     /// <inheritdoc />
     protected override bool? IsPositiveEffect => false;

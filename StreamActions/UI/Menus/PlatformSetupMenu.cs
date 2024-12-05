@@ -1,4 +1,5 @@
-﻿using BTD_Mod_Helper.Api;
+﻿using System;
+using BTD_Mod_Helper.Api;
 using BTD_Mod_Helper.Api.Components;
 using BTD_Mod_Helper.Api.Enums;
 using Il2CppAssets.Scripts.Unity.UI_New.ChallengeEditor;
@@ -76,6 +77,17 @@ public class PlatformSetupMenu : ModGameMenu<ExtraSettingsScreen>
     {
         RightMenu.gameObject.DestroyAllChildren();
         platform.CreateConnectPanel(RightMenu);
+        RightMenu.AddButton(new Info("ConnectButton", 600, 250), VanillaSprites.GreenBtnLong,
+            new Action(() => ConnectToPlatform(platform))).AddText(new Info("Text", InfoPreset.FillParent), "Connect", 69);
+    }
+
+    private void ConnectToPlatform(StreamingPlatform platform)
+    {
+        StreamingPlatform.CurrentPlatform?.Disconnect();
+
+        StreamingPlatform.CurrentPlatform = platform;
+
+        platform.ConnectToPlatform();
     }
 
     private void CreateRightMenu(ModHelperPanel modPanel)

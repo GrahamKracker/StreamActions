@@ -79,12 +79,14 @@ public class Main : BloonsTD6Mod
     /// <inheritdoc />
     public override void OnTitleScreen()
     {
-        if (Settings.SaveToCache)
+        if (Settings.SaveToCache && File.Exists(Path.Combine(CacheFolder, "LastPlatform.txt")))
         {
-            foreach (var streamingPlatform in StreamingPlatform.Platforms.OrderBy(x=>x.Priority)) //todo: save only the last streaming platform, and enforce only one active at once
+            var lastPlatform = File.ReadAllText(Path.Combine(CacheFolder, "LastPlatform.txt"));
+            var platform = StreamingPlatform.Platforms.Find(p => p.Name == lastPlatform);
+            if(platform != null && platform.LoadFromCache())
             {
-                if(streamingPlatform.LoadFromCache())
-                    return;
+                ModLogger.Msg($"Successfully loaded {platform.DisplayName} from cache");
+                StreamingPlatform.CurrentPlatform = platform;
             }
         }
     }

@@ -13,7 +13,8 @@ namespace StreamActions.StreamingPlatforms;
 public abstract class StreamingPlatform : NamedModContent
 {
     public static List<StreamingPlatform> Platforms { get; } = [];
-    protected HashSet<string> ChannelsAnswered { get; } = [];
+    public static StreamingPlatform? CurrentPlatform { get; set; }
+    private HashSet<string> ChannelsAnswered { get; } = [];
 
     public virtual void OnNewPoll(){
         ChannelsAnswered.Clear();
@@ -27,8 +28,11 @@ public abstract class StreamingPlatform : NamedModContent
 
     protected void SaveToCache()
     {
-        if(Settings.SaveToCache)
+        if (Settings.SaveToCache)
+        {
             File.WriteAllLines(CacheFile, CacheData);
+            File.WriteAllText(Path.Combine(CacheFolder, "LastPlatform.txt"), Name);
+        }
     }
 
     protected virtual void OnMessageReceived(string author, string message)
@@ -62,4 +66,6 @@ public abstract class StreamingPlatform : NamedModContent
     {
         Platforms.Add(this);
     }
+
+    public abstract void Disconnect();
 }

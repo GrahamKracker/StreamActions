@@ -35,7 +35,7 @@ public class PollPanelBehaviour(IntPtr ptr) : MonoBehaviour(ptr)
 
     private float GetDeltaTime()
     {
-        if(TimeManager.gamePaused && Settings.PausePollsOnPause)
+        if(TimeManager.gamePaused && Settings.PausePollsOnGamePause)
             return 0;
         return Settings.ScalePollCountDown ? Time.deltaTime : Time.unscaledDeltaTime;
     }
@@ -83,10 +83,7 @@ public class PollPanelBehaviour(IntPtr ptr) : MonoBehaviour(ptr)
                     Votes[i] = 0;
                 }
 
-                foreach (var streamingPlatform in StreamingPlatform.Platforms)
-                {
-                    streamingPlatform.OnNewPoll();
-                }
+                StreamingPlatform.CurrentPlatform?.OnNewPoll();
 
                 RandomizeActionOptions();
                 PollPanel.Update();
@@ -116,8 +113,9 @@ public class PollPanelBehaviour(IntPtr ptr) : MonoBehaviour(ptr)
         {
             var num = StreamAction.Random.Next(0, StreamAction.TotalWeight);
             var action = StreamAction.Weights.First(x => num >= x.Key.Item1 && num < x.Key.Item2).Value;
-            if (ActionOptions.ContainsValue(action) || _currentAction == action) //todo: poor patch to alleviate bad design choices leading to data leaking over multiple polls
-                                                                                 //todo: in the future, refactor to use new instances of each action instead, although weighted list may need to be overhauled due to reliance on mod helper's singleton modcontent system
+            if (ActionOptions.ContainsValue(action) || _currentAction == action)
+//todo: poor patch to alleviate bad design choices leading to data leaking over multiple polls in the future,
+//refactor to use new instances of each action instead, although weighted list may need to be overhauled due to reliance on mod helper's singleton modcontent system
             {
                 continue;
             }

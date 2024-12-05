@@ -1,4 +1,5 @@
-﻿using System.IO.Compression;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.IO.Compression;
 using System.IO.Pipes;
 using System.Text;
 using System.Text.Json;
@@ -20,10 +21,7 @@ class Program
     {
         try
         {
-            AppDomain.CurrentDomain.ProcessExit += (_, _) =>
-            {
-                _driver?.Quit();
-            };
+            AppDomain.CurrentDomain.ProcessExit += (_, _) => { _driver?.Quit(); };
             AppDomain.CurrentDomain.UnhandledException += (_, _) =>
             {
                 File.WriteAllText(Path.Combine(args[0] + "error.txt"), "exit at " + DateTime.Now.ToString("HH:mm:ss"));
@@ -32,7 +30,7 @@ class Program
 
             var server = new PipeServer<PipeMessage>("SeleniumWrapper", formatter: new NewtonsoftJsonFormatter());
 
-            server.ClientConnected +=  (o, args) =>
+            server.ClientConnected += (o, args) =>
             {
                 Console.WriteLine($"Client {args.Connection.PipeName} is now connected!");
             };
@@ -77,12 +75,14 @@ class Program
 
             var options = new EdgeOptions();
 
-            options.AddArgument("--disable-extensions");
-            options.AddArgument("--disable-gpu");
-            options.AddArgument("--no-sandbox");
-            options.AddArgument("--headless");
-
-
+            if (args.Length < 3 || args[2] == "false")
+            {
+                options.AddArgument("--disable-extensions");
+                options.AddArgument("--disable-gpu");
+                options.AddArgument("--no-sandbox");
+                options.AddArgument("--headless");
+            }
+            
             _driver = new EdgeDriver(Path.Combine(cacheFolder, "edgedriver_win64", "msedgedriver.exe"), options);
 
             var devToolsSession = _driver.GetDevToolsSession();
@@ -133,7 +133,10 @@ class Program
                                     "runs"]?[0]?["text"];
                             if (authorName == null || message == null) continue;
 
-                            await server.WriteAsync(new PipeMessage(authorName.ToString(), message.ToString()));
+                            await server.WriteAsync(new PipeMessage(MessageType.ChatMessage, new Dictionary<string, string>(){
+                                ["Author"] = authorName.ToString(),
+                                ["Message"] = message.ToString(),
+                            }));
                         }
                     }
                     catch (JsonException)
@@ -149,14 +152,24 @@ class Program
 
             await _driver.Navigate().GoToUrlAsync(url);
 
-            //todo: detect if livestream is actually running and if not, cancel and return, telling the mod that it doesnt exist too
+            if (_driver.FindElements(By.XPath("/html/body/yt-live-chat-app/div/yt-live-chat-message-renderer/yt-formatted-string")).FirstOrDefault() != null
+                || _driver.FindElements(By.XPath("/html/body/div/h1")).FirstOrDefault() != null)
+            {
+                Console.WriteLine("Error: No chat available for livestream, or livestream has ended.");
+                await server.WriteAsync(new PipeMessage(MessageType.Error, new Dictionary<string, string>(){
+                    ["Error"] = "No chat available for livestream, or livestream has ended."
+                }));
+                await server.StopAsync();
+                _driver.Quit();
+                return;
+            }
 
             try
             {
                 await Task.Delay(4000);
-                _driver.FindElement(By.XPath("//*[@id=\"label-text\"]")).Click();
+                _driver.FindElements(By.XPath("//*[@id=\"label-text\"]")).FirstOrDefault()?.Click();
                 await Task.Delay(500);
-                _driver.FindElement(By.XPath("/html/body/yt-live-chat-app/div/yt-live-chat-renderer/iron-pages/div/yt-live-chat-header-renderer/div[1]/span[2]/yt-sort-filter-sub-menu-renderer/yt-dropdown-menu/tp-yt-paper-menu-button/tp-yt-iron-dropdown/div/div/tp-yt-paper-listbox/a[2]/tp-yt-paper-item")).Click();
+                _driver.FindElements(By.XPath("/html/body/yt-live-chat-app/div/yt-live-chat-renderer/iron-pages/div/yt-live-chat-header-renderer/div[1]/span[2]/yt-sort-filter-sub-menu-renderer/yt-dropdown-menu/tp-yt-paper-menu-button/tp-yt-iron-dropdown/div/div/tp-yt-paper-listbox/a[2]/tp-yt-paper-item")).FirstOrDefault()?.Click();
             }
             catch (Exception e)
             {
@@ -172,12 +185,18 @@ class Program
         }
     }
 
-    private record PipeMessage(string Author, string Message)
+    [SuppressMessage("ReSharper", "UnusedMember.Local")]
+    private record PipeMessage(MessageType Type, Dictionary<string, string> Payload)
     {
-        // ReSharper disable once UnusedMember.Local
-        public string Author = Author;
-        // ReSharper disable once UnusedMember.Local
-        public string Message = Message;
+        public readonly MessageType Type = Type;
+        public readonly Dictionary<string, string> Payload = Payload;
+    }
+
+    private enum MessageType : byte
+    {
+        ChatMessage = 0,
+        Error = 1,
+        SuccessfulConnection = 2,
     }
 
     ~Program() => _driver?.Quit();

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
@@ -93,13 +94,19 @@ public class  YoutubePlatform : StreamingPlatform
             var client = new PipeClient<PipeMessage>("SeleniumWrapper", formatter:new NewtonsoftJsonFormatter());
             client.MessageReceived += (o, args) =>
             {
-                if (args.Message != null)
-                    OnMessageReceived(args.Message.Author, args.Message.Message);
+                if (args.Message is { Type: MessageType.ChatMessage })
+                    OnMessageReceived(args.Message.Payload["Author"], args.Message.Payload["Message"]);
+                if (args.Message is { Type: MessageType.Error })
+                {
+                    ModLogger.Error("Error from SeleniumWrapper: " + args.Message.Payload["Error"]);
+                    PopupScreen.instance.SafelyQueue(p => { p.ShowOkPopup(
+                        $"Error from YouTube video connection: {args.Message.Payload["Error"]}"); });
+                    KillSeleniumWrapper();
+                }
             };
             client.Disconnected += (o, args) =>
             {
                 ModLogger.Warning("Disconnected from SeleniumWrapper named pipe");
-                PopupScreen.instance.SafelyQueue(p => { p.ShowOkPopup("Disconnected from YouTube video"); });
                 KillSeleniumWrapper();
             };
             client.Connected += (o, args) => ModLogger.Msg("Connected to SeleniumWrapper named pipe");
@@ -113,7 +120,7 @@ public class  YoutubePlatform : StreamingPlatform
 
             await client.ConnectAsync();
 
-            PopupScreen.instance.SafelyQueue(p => { p.ShowOkPopup("Connected to YouTube video"); });
+            PopupScreen.instance.SafelyQueue(p => { p.ShowOkPopup("Successfully connected to video browser client"); });
 
             if (Settings.SaveToCache && VideoIdInput?.InputField?.text != null)
             {
@@ -169,17 +176,26 @@ public class  YoutubePlatform : StreamingPlatform
                 Height = height,
             }, "",
             VanillaSprites.BlueInsertPanelRound, null, 65);
+    }
 
-        rightMenu.AddButton(new Info("ConnectButton", 600, 250), VanillaSprites.GreenBtnLong,
-            new Action(ConnectToPlatform)).AddText(new Info("Text", InfoPreset.FillParent), "Connect", 69);
+    /// <inheritdoc />
+    public override void Disconnect()
+    {
+        KillSeleniumWrapper();
     }
 
     ~YoutubePlatform() => KillSeleniumWrapper();
 
     // ReSharper disable once ClassNeverInstantiated.Local
-    private sealed record PipeMessage(string Author, string Message)
+    private record PipeMessage(MessageType Type, Dictionary<string, string> Payload)
     {
-        public readonly string Author = Author;
-        public readonly string Message = Message;
+        public readonly MessageType Type = Type;
+        public readonly Dictionary<string, string> Payload = Payload;
+    }
+
+    private enum MessageType : byte
+    {
+        ChatMessage = 0,
+        Error = 1,
     }
 }

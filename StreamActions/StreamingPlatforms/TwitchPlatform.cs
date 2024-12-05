@@ -119,7 +119,11 @@ public class TwitchPlatform : StreamingPlatform
                 "", VanillaSprites.BlueInsertPanelRound, null, 65
             );
         TokenInput.InputField.contentType = TMP_InputField.ContentType.Password;
+    }
 
-        rightMenu.AddButton(new Info("ConnectButton", 600, 250), VanillaSprites.GreenBtnLong, new System.Action(ConnectToPlatform)).AddText(new Info("Text", InfoPreset.FillParent),"Connect", 69);
+    /// <inheritdoc />
+    public override void Disconnect()
+    {
+        client?.Disconnect();
     }
 }

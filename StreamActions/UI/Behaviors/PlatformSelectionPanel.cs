@@ -37,7 +37,6 @@ public class PlatformSelectionPanel(IntPtr ptr) : ModHelperComponent(ptr)
 
         Name.SetText(platform.DisplayName);
 
-
         Icon.Image.SetSprite(platform.IconReference);
 
         SetActive(true);

@@ -10,18 +10,18 @@ public class Settings : ModSettings
     public static ModSettingBool SaveToCache { get; } = new(false)
     {
         displayName = nameof(SaveToCache).Spaced(),
-        description = "Save the twitch access token or youtube video id to a cache file and automatically connect using that token on boot, prioritizing saved twitch tokens over youtube video ids.",
+        description = "Save the relevant data for a streaming platform to a cache file and automatically connects using that data to the last used streaming platform when the game is started.",
     };
 
     public static ModSettingBool ScalePollCountDown { get; } = new(false)
     {
         displayName = nameof(ScalePollCountDown).Spaced(),
-        description = "Whether the countdown until the next poll should be scaled with the in-game speed.",
+        description = "Whether poll countdowns should be scaled with the in-game speed.",
     };
 
-    public static ModSettingBool PausePollsOnPause { get; } = new(true)
+    public static ModSettingBool PausePollsOnGamePause { get; } = new(true)
     {
-        displayName = nameof(PausePollsOnPause).Spaced(),
+        displayName = nameof(PausePollsOnGamePause).Spaced(),
         description = "Whether to pause the poll countdown when the game is paused.",
     };
 }
