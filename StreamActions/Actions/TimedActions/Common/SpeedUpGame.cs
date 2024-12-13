@@ -12,13 +12,6 @@ public class SpeedUpGame : TimedAction
     public override void OnChosen()
     {
         _speedUpTimeScale = Speed;
-        _isActive = true;
-    }
-
-    /// <inheritdoc />
-    public override void OnEnd()
-    {
-        _isActive = false;
     }
 
     /// <inheritdoc />
@@ -39,8 +32,6 @@ public class SpeedUpGame : TimedAction
 
     private float Speed { get; set; }
 
-    private static bool _isActive = false;
-
     private static float _speedUpTimeScale = 1;
 
     [HarmonyPatch(typeof(TimeManager), nameof(TimeManager.FastForwardTimeScale), MethodType.Getter)]
@@ -48,7 +39,7 @@ public class SpeedUpGame : TimedAction
     [HarmonyPriority(Priority.Low)]
     private static bool Prefix(ref double __result)
     {
-        if (!_isActive)
+        if (!IsActive<SpeedUpGame>())
         {
             return true;
         }
@@ -62,7 +53,7 @@ public class SpeedUpGame : TimedAction
     [HarmonyPriority(Priority.Low)]
     private static void Postfix()
     {
-        if (InGame.Bridge == null || InGame.instance == null || !_isActive)
+        if (InGame.Bridge == null || InGame.instance == null || !IsActive<SpeedUpGame>())
             return;
         Time.timeScale = TimeManager.gamePaused ? 0 : _speedUpTimeScale;
     }

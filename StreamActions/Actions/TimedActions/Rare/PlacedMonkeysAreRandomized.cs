@@ -13,7 +13,6 @@ public class PlacedMonkeysAreRandomized : TimedAction
     /// <inheritdoc />
     public override void OnChosen()
     {
-        IsActive = true;
     }
 
     /// <inheritdoc />
@@ -33,19 +32,12 @@ public class PlacedMonkeysAreRandomized : TimedAction
     }
 
 
-    /// <inheritdoc />
-    public override void OnEnd()
-    {
-        IsActive = false;
-    }
-
-    private static bool IsActive { get; set; }
 
     [HarmonyPatch(typeof(InputManager), nameof(InputManager.TryPlace))]
     [HarmonyPrefix]
     private static void InputManager_TryPlace(InputManager __instance)
     {
-        if (IsActive)
+        if (IsActive<PlacedMonkeysAreRandomized>())
         {
             __instance.placementModel = GetSimilar(__instance.placementModel);
         }
@@ -55,7 +47,7 @@ public class PlacedMonkeysAreRandomized : TimedAction
     [HarmonyPrefix]
     private static bool TowerManager_UpgradeTower(Il2CppAssets.Scripts.Simulation.Towers.Tower tower, TowerModel def)
     {
-        if (IsActive)
+        if (IsActive<PlacedMonkeysAreRandomized>())
         {
             var randomTower = GetSimilar(def);
             var newtower = InGame.instance.GetTowerManager()

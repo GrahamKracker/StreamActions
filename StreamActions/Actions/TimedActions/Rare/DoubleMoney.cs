@@ -6,17 +6,9 @@ namespace StreamActions.Actions.TimedActions;
 
 public class DoubleMoney : TimedAction
 {
-    private static bool Active; //todo: make api for active bool in static context
-
     /// <inheritdoc />
     public override void OnChosen()
     {
-        Active = true;
-    }
-
-    public override void OnEnd()
-    {
-        Active = false;
     }
 
     /// <inheritdoc />
@@ -39,7 +31,7 @@ public class DoubleMoney : TimedAction
     [HarmonyPostfix]
     private static void Simulation_AddCash(ref int cash)
     {
-        if (Active)
+        if (IsActive<DoubleMoney>())
         {
             cash *= 2;
         }

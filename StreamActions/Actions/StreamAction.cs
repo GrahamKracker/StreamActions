@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BTD_Mod_Helper.Api;
+using StreamActions.Actions.TimedActions;
 using UnityEngine;
 using Random = System.Random;
 
@@ -27,7 +28,7 @@ public abstract class StreamAction : NamedModContent
             return (bool) IsPositiveEffect ? Color.green : Color.red;}
     }
 
-    public static int TotalWeight { get; set; }
+    public static int TotalWeight { get; private set; }
 
     protected internal static Random Random { get; } = new();
 
