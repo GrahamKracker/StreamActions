@@ -5,7 +5,6 @@ using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.AbilitiesMenu;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame.TowerSelectionMenu;
 using Random = System.Random;
-using Tower = Il2CppAssets.Scripts.Unity.Towers.Tower;
 
 namespace StreamActions.Actions.TimedActions;
 

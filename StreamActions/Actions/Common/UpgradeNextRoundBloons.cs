@@ -2,7 +2,6 @@
 using BTD_Mod_Helper.Api.Enums;
 using Il2CppAssets.Scripts.Models.Bloons.Behaviors;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
-using Il2CppAssets.Scripts.Unity.UI_New.InGame.BloonMenu;
 using Random = System.Random;
 
 namespace StreamActions.Actions;
@@ -33,7 +32,12 @@ public class UpgradeNextRoundBloons : StreamAction
     /// <inheritdoc />
     public override void OnChosen()
     {
+        if(InGame.instance.GetGameModel().roundSet.rounds.Length <= InGame.instance.bridge.GetCurrentRound() + 1)
+            return;
+
         var round = InGame.instance.GetGameModel().roundSet.rounds[InGame.instance.bridge.GetCurrentRound() + 1];
+
+
         if (round != null)
         {
             foreach (var bloonGroupModel in round.groups)

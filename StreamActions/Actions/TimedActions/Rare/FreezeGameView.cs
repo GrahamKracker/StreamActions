@@ -1,8 +1,4 @@
-﻿using System;
-using Il2CppAssets.Scripts.Unity;
-using UnityEngine;
-using UnityEngine.UI;
-using Object = UnityEngine.Object;
+﻿using Il2CppAssets.Scripts.Unity;
 using Random = System.Random;
 
 namespace StreamActions.Actions.TimedActions;

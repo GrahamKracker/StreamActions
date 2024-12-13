@@ -40,6 +40,10 @@
             <HintPath>$(BloonsTD6)\Mods\WebAnalyticsLib.dll</HintPath>
         </Reference>
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Actions\TimedActions\Legendary\" />
+    </ItemGroup>
     
     <Import Project="..\..\btd6.targets" />
 

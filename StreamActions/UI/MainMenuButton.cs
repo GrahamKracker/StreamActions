@@ -1,7 +1,9 @@
 ﻿using BTD_Mod_Helper.Api;
 using BTD_Mod_Helper.Api.Components;
+using Il2CppAssets.Scripts.Unity;
 using Il2CppAssets.Scripts.Unity.UI_New.Main;
 using Il2CppAssets.Scripts.Unity.UI_New.Main.Home;
+using Il2CppAssets.Scripts.Unity.UI_New.PlayerStats;
 using Il2CppNinjaKiwi.Common.ResourceUtils;
 using Il2CppTMPro;
 using StreamActions.UI.Menus;

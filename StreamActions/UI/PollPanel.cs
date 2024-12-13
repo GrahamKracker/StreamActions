@@ -11,6 +11,8 @@ namespace StreamActions.UI;
 
 public static class PollPanel
 {
+    //todo: add an option to have this in a separate window, probably using winapi (fun) to make a new window handler, could also use winforms but thats gay
+
     private static readonly ModHelperText[] Texts = new ModHelperText[4];
     private static ModHelperText? _timeText;
     private static ModHelperText? _timeLeftText;
