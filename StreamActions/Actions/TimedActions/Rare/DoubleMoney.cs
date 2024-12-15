@@ -1,4 +1,6 @@
 ﻿using Il2CppAssets.Scripts.Simulation;
+using Il2CppAssets.Scripts.Simulation.Tracking;
+using Il2CppAssets.Scripts.Unity.Bridge;
 using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Random = System.Random;
 
@@ -28,12 +30,12 @@ public class DoubleMoney : TimedAction
 
 
     [HarmonyPatch(typeof(Simulation), nameof(Simulation.AddCash))]
-    [HarmonyPostfix]
-    private static void Simulation_AddCash(ref int cash)
+    [HarmonyPrefix]
+    private static void UnityToSimulation_AddCash(ref double c)
     {
         if (IsActive<DoubleMoney>())
         {
-            cash *= 2;
+            c *= 2;
         }
     }
 }

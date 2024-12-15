@@ -11,9 +11,9 @@ namespace StreamActions.UI;
 
 public static class PollPanel
 {
-    //todo: add an option to have this in a separate window, probably using winapi (fun) to make a new window handler, could also use winforms but thats gay
+    //todo: add an option to have this in a separate window so streamers cant see the next option, probably using winapi (fun) to make a new window handler, could also use winforms
 
-    private static readonly ModHelperText[] Texts = new ModHelperText[4];
+    private static readonly ModHelperText[] OptionTexts = new ModHelperText[4];
     private static ModHelperText? _timeText;
     private static ModHelperText? _timeLeftText;
     public static void Create(MainHudLeftAlign hudLeftAlign)
@@ -32,27 +32,36 @@ public static class PollPanel
 
         _timeText.Text.enableAutoSizing = true;
         _timeText.Text.color = Color.yellow;
+        _timeText.Text.raycastTarget = false;
 
-        (Texts[0] = panel.AddText(new Info("Option1", 0, 0, textWidth, textHeight), "1", 42, TextAlignmentOptions.MidlineLeft)).Text
+        (OptionTexts[0] = panel.AddText(new Info("Option1", 0, 0, textWidth, textHeight), "1", 42, TextAlignmentOptions.MidlineLeft)).Text
             .enableAutoSizing = true;
-        (Texts[1] = panel.AddText(new Info("Option2", 0, 0, textWidth, textHeight), "2", 42, TextAlignmentOptions.MidlineLeft)).Text
+        (OptionTexts[1] = panel.AddText(new Info("Option2", 0, 0, textWidth, textHeight), "2", 42, TextAlignmentOptions.MidlineLeft)).Text
             .enableAutoSizing = true;
-        (Texts[2] = panel.AddText(new Info("Option3", 0, 0, textWidth, textHeight), "3", 42, TextAlignmentOptions.MidlineLeft)).Text
+        (OptionTexts[2] = panel.AddText(new Info("Option3", 0, 0, textWidth, textHeight), "3", 42, TextAlignmentOptions.MidlineLeft)).Text
             .enableAutoSizing = true;
-        (Texts[3] = panel.AddText(new Info("Option4", 0, 0, textWidth, textHeight), "4", 42, TextAlignmentOptions.MidlineLeft)).Text
+        (OptionTexts[3] = panel.AddText(new Info("Option4", 0, 0, textWidth, textHeight), "4", 42, TextAlignmentOptions.MidlineLeft)).Text
             .enableAutoSizing = true;
         var advertising = panel.AddText(new Info("Advertising", 0, 0, textWidth, textHeight), "Made by GrahamKracker", 42, TextAlignmentOptions.MidlineLeft);
         advertising.Text.enableAutoSizing = true;
         advertising.Text.color = new Color(117, 0, 195);
+        advertising.Text.raycastTarget = false;
 
         _timeLeftText = panel.AddText(new Info("TimeLeft", 0, 0, textWidth, textHeight), "", 42,
             TextAlignmentOptions.MidlineLeft);
         _timeLeftText.Text.enableAutoSizing = true;
         _timeLeftText.Text.color = Color.white;
         _timeLeftText.SetActive(false);
+        _timeLeftText.Text.raycastTarget = false;
+        panel.Background.raycastTarget = false;
+
+        foreach (var text in OptionTexts)
+        {
+            text.Text.raycastTarget = false;
+        }
     }
 
-    private static bool DoTextsExist() => !Texts.Any(x => x == null);
+    private static bool DoTextsExist() => !OptionTexts.Any(x => x == null);
 
     public static void Update()
     {
@@ -61,28 +70,28 @@ public static class PollPanel
         int i = 0;
         foreach (var streamAction in ActionOptions.Values)
         {
-            Texts[i].SetText($"{i + 1}:  {streamAction.ChoiceText} ({Votes[i + 1]} votes)");
-            Texts[i].Text.color = streamAction.ChoiceColor;
+            OptionTexts[i].SetText($"{i + 1}:  {streamAction.ChoiceText} ({Votes[i + 1]} votes)");
+            OptionTexts[i].Text.color = streamAction.ChoiceColor;
             i++;
         }
     }
 
     public static void UpdateVotes()
     {
-        if (Texts.Any(x => x == null))
+        if (OptionTexts.Any(x => x == null))
             return;
 
         foreach ((int index, int amount) in Votes)
         {
             int i = index - 1;
-            var text = Texts[i].Text.text;
+            var text = OptionTexts[i].Text.text;
             var voteIndex = text.LastIndexOf(" (", StringComparison.Ordinal);
             if (voteIndex == -1)
             {
-                Texts[i].SetText($"{text} ({amount} votes)");
+                OptionTexts[i].SetText($"{text} ({amount} votes)");
                 continue;
             }
-            Texts[i].SetText($"{text.Remove(voteIndex)} ({amount} votes)");
+            OptionTexts[i].SetText($"{text.Remove(voteIndex)} ({amount} votes)");
         }
     }
 
