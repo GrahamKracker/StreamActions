@@ -99,11 +99,13 @@ public class PollPanelBehaviour(IntPtr ptr) : MonoBehaviour(ptr)
             }
         }
 
-        if (Time.time - _lastVoteUpdate < VoteUpdateCooldown)
+        if (_lastVoteUpdate >= VoteUpdateCooldown)
         {
             PollPanel.UpdateVotes();
-            _lastVoteUpdate = Time.time;
+            _lastVoteUpdate = 0;
         }
+
+        _lastVoteUpdate += Time.unscaledDeltaTime;
     }
 
     private void RandomizeActionOptions()

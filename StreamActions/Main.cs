@@ -32,6 +32,7 @@ using TaskScheduler = BTD_Mod_Helper.Api.TaskScheduler;
 
 [assembly: MelonInfo(typeof(StreamActions.Main), ModHelperData.Name, ModHelperData.Version, ModHelperData.RepoOwner)]
 [assembly: MelonGame("Ninja Kiwi", "BloonsTD6")]
+[assembly: MelonOptionalDependencies("WebAnalyticsLib")]
 
 namespace StreamActions;
 
@@ -110,8 +111,6 @@ public class Main : BloonsTD6Mod
 
     public static void ChatMessageReceived(string chatMessage)
     {
-        MelonLogger.Msg("received: " + chatMessage);
-
         int charPos = 0;
         char cToCheck = chatMessage[0];
         if (cToCheck is not '1' and not '2' and not '3' and not '4')
@@ -130,6 +129,7 @@ public class Main : BloonsTD6Mod
         if (int.TryParse(chatMessage[0].ToString(), out int i) && i is >= 1 and <= 4)
         {
             Votes[i]++;
+            MelonLogger.Msg("Vote received for " + i);
         }
     }
 

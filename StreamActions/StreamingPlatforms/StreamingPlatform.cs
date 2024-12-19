@@ -37,7 +37,7 @@ public abstract class StreamingPlatform : NamedModContent
 
     protected virtual void OnMessageReceived(string author, string message)
     {
-        if ((InGame.instance == null || !InGame.instance.IsInGame()) || ChannelsAnswered.Add(author))
+        if ((InGame.instance == null || !InGame.instance.IsInGame()) || ChannelsAnswered.Add(author)) //chatting outside a game will not lock you out of voting
             ChatMessageReceived(message);
     }
 

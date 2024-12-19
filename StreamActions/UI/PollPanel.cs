@@ -88,10 +88,10 @@ public static class PollPanel
             var voteIndex = text.LastIndexOf(" (", StringComparison.Ordinal);
             if (voteIndex == -1)
             {
-                OptionTexts[i].SetText($"{text} ({amount} votes)");
+                OptionTexts[i].SetText($"{text} ({amount} vote{(amount == 1 ? "" : "s")})");;
                 continue;
             }
-            OptionTexts[i].SetText($"{text.Remove(voteIndex)} ({amount} votes)");
+            OptionTexts[i].SetText($"{text.Remove(voteIndex)} ({amount} vote{(amount == 1 ? "" : "s")})");
         }
     }
 
