@@ -26,7 +26,6 @@ using TwitchLib.Communication.Models;
 using TwitchLib.Client.Events;
 using UnityEngine;
 using UnityEngine.UI;
-using WebAnalyticsLib;
 using Random = UnityEngine.Random;
 using TaskScheduler = BTD_Mod_Helper.Api.TaskScheduler;
 
@@ -52,40 +51,8 @@ public class Main : BloonsTD6Mod
 
         AppDomain.CurrentDomain.ProcessExit += (_, _) => OnApplicationQuit();
         AppDomain.CurrentDomain.UnhandledException += (_, _) => OnApplicationQuit();
-
-        if (_hasAnalytics = AppDomain.CurrentDomain.GetAssemblies().Any(a => a.GetName().Name == "WebAnalyticsLib"))
-            InitAnalytics();
     }
 
-    private static bool _hasAnalytics;
-
-    private static void InitAnalytics()
-    {
-        Analytics.CreateAndInit("GrahamKracker_StreamActions");
-        SendAnalytics(AnalyticsAction.Started);
-    }
-
-    public static void SendAnalytics(AnalyticsAction action)
-    {
-        //check if WebAnalyticsLib dll is available
-        if(_hasAnalytics)
-            SendAnalytics((int) action);
-    }
-
-    private static void SendAnalytics(int action)
-    {
-        Analytics.SendAnalytics(action);
-    }
-
-    //4 bits available
-    public enum AnalyticsAction : byte
-    {
-        Started = 0b0000,
-        ManualTwitch  = 0b0001,
-        ManualYoutube = 0b0010,
-        AutoTwitch    = 0b0011,
-        AutoYoutube   = 0b0100,
-    }
 
     [HarmonyPatch(typeof(MainMenu), nameof(MainMenu.Start))]
     [HarmonyPostfix]

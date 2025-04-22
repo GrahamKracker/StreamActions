@@ -137,7 +137,6 @@ public class  YoutubePlatform : StreamingPlatform
     {
         try
         {
-            SendAnalytics(AnalyticsAction.ManualYoutube);
             await SetupYoutube(VideoIdInput.InputField.text);
         }
         catch (Exception e)
@@ -153,7 +152,6 @@ public class  YoutubePlatform : StreamingPlatform
     protected override bool LoadFromCacheData(string[] lines)
     {
         SetupYoutube(lines[0]).Wait();
-        SendAnalytics(AnalyticsAction.AutoYoutube);
         return true;
     }
 

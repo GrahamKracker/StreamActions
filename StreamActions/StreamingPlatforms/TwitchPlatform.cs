@@ -28,7 +28,6 @@ public class TwitchPlatform : StreamingPlatform
     /// <inheritdoc />
     public override void ConnectToPlatform()
     {
-        SendAnalytics(AnalyticsAction.ManualTwitch);
         InitClient(ChannelInput.InputField.text, TokenInput.InputField.text);
     }
 
@@ -73,7 +72,6 @@ public class TwitchPlatform : StreamingPlatform
     protected override bool LoadFromCacheData(string[] lines)
     {
         InitClient(lines[0], lines[1]);
-        SendAnalytics(AnalyticsAction.AutoTwitch);
         return true;
     }
 
