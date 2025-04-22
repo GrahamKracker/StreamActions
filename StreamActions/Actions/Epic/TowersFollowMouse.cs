@@ -37,12 +37,6 @@ public class TowersFollowMouse : StreamAction
                 [0] = new TargetType(TargetType.FollowTouch, false, false, false),
             };
 
-            towerModel.TargetTypes = new Il2CppReferenceArray<TargetType>(1)
-            {
-                [0] = new TargetType(TargetType.FollowTouch, false, false, false),
-            };
-
-
             towerModel.UpdateTargetProviders();
             tower.tower.UpdateRootModel(towerModel);
             tower.tower.UpdateTargetType();
