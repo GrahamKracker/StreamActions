@@ -13,13 +13,13 @@ using TwitchLib.Communication.Clients;
 using TwitchLib.Communication.Models;
 using UnityEngine;
 using Action = Il2CppSystem.Action;
+using Random = UnityEngine.Random;
 
 namespace StreamActions.StreamingPlatforms;
 
 public class TwitchPlatform : StreamingPlatform
 {
     private TwitchClient? client;
-    private ModHelperInputField TokenInput { get; set; } = null!;
     private ModHelperInputField ChannelInput { get; set; } = null!;
 
     /// <inheritdoc />
@@ -28,10 +28,10 @@ public class TwitchPlatform : StreamingPlatform
     /// <inheritdoc />
     public override void ConnectToPlatform()
     {
-        InitClient(ChannelInput.InputField.text, TokenInput.InputField.text);
+        InitClient(ChannelInput.InputField.text);
     }
 
-    private void InitClient(string username, string token)
+    private void InitClient(string channel)
     {
         try
         {
@@ -42,8 +42,8 @@ public class TwitchPlatform : StreamingPlatform
             };
 
             client = new TwitchClient(new WebSocketClient(clientOptions));
-            client.Initialize(new ConnectionCredentials(username, token),
-                username);
+            client.Initialize(new ConnectionCredentials("justinfan" + Random.RandomRangeInt(1,10000), ""),
+                channel);
 
             client.OnMessageReceived += Client_OnMessageReceived;
 
@@ -66,18 +66,18 @@ public class TwitchPlatform : StreamingPlatform
     }
 
     /// <inheritdoc />
-    protected override string[] CacheData => [client.ConnectionCredentials.TwitchUsername, client.ConnectionCredentials.TwitchOAuth];
+    protected override string[] CacheData => [client.JoinedChannels[0].Channel];
 
     /// <inheritdoc />
     protected override bool LoadFromCacheData(string[] lines)
     {
-        InitClient(lines[0], lines[1]);
+        InitClient(lines[0]);
         return true;
     }
 
     private void Client_OnMessageReceived(object? sender, OnMessageReceivedArgs e)
     {
-        OnMessageReceived(e.ChatMessage.Channel, e.ChatMessage.Message);
+        OnMessageReceived(e.ChatMessage.UserId, e.ChatMessage.Message);
     }
 
     /// <inheritdoc />
@@ -99,24 +99,6 @@ public class TwitchPlatform : StreamingPlatform
                 Height = height,
             }, "",
             VanillaSprites.BlueInsertPanelRound, null, 65);
-
-        var tokenPanel = rightMenu.AddPanel(new Info("TokenPanel")
-        {
-            Width = rightMenu.initialInfo.Width - 50 * 2,
-            Height = 200,
-        }, null, RectTransform.Axis.Horizontal, 100);
-
-        tokenPanel.AddText(new Info("ChannelLabel", labelWidth, height), "Token: ", 65).Text.enableAutoSizing = true;
-        TokenInput = tokenPanel
-
-            .AddInputField(new Info("TokenInput")
-                {
-                    FlexWidth = 1,
-                    Height = height,
-                },
-                "", VanillaSprites.BlueInsertPanelRound, null, 65
-            );
-        TokenInput.InputField.contentType = TMP_InputField.ContentType.Password;
     }
 
     /// <inheritdoc />
