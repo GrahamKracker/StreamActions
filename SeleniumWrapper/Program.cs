@@ -1,14 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.IO.Compression;
-using System.IO.Pipes;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using H.Formatters;
 using H.Pipes;
 using OpenQA.Selenium;
 using OpenQA.Selenium.DevTools;
-using OpenQA.Selenium.DevTools.V131.Network;
+using OpenQA.Selenium.DevTools.V135.Network;
 using OpenQA.Selenium.Edge;
 
 namespace SeleniumWrapper;
@@ -49,29 +47,10 @@ class Program
             var cacheFolder = args[0];
             var url = args[1];
 
-            using HttpClient client = new();
+            if (!Directory.Exists(cacheFolder))
+                Directory.CreateDirectory(cacheFolder);
 
-            if (!File.Exists(Path.Combine(cacheFolder, "edgedriver_win64", "msedgedriver.exe")))
-            {
-                var response =
-                    await client.GetAsync("https://msedgedriver.azureedge.net/131.0.2903.70/edgedriver_win64.zip");
-                await using var stream = await response.Content.ReadAsStreamAsync();
-
-                await using var fileStream = File.Create(Path.Combine(cacheFolder, "edgedriver_win64.zip"));
-
-                await stream.CopyToAsync(fileStream);
-
-                fileStream.Close();
-
-                //extract the zip
-
-                ZipFile.ExtractToDirectory(Path.Combine(cacheFolder, "edgedriver_win64.zip"),
-                    Path.Combine(cacheFolder, "edgedriver_win64"));
-
-                File.Delete(Path.Combine(cacheFolder, "edgedriver_win64.zip"));
-
-                Directory.Delete(Path.Combine(cacheFolder, "edgedriver_win64", "Driver_Notes"), true);
-            }
+            DriverHandler.DownloadLatest(cacheFolder);
 
             var options = new EdgeOptions();
 
@@ -82,12 +61,21 @@ class Program
                 options.AddArgument("--no-sandbox");
                 options.AddArgument("--headless");
             }
-            
-            _driver = new EdgeDriver(Path.Combine(cacheFolder, "edgedriver_win64", "msedgedriver.exe"), options);
 
-            var devToolsSession = _driver.GetDevToolsSession();
+            _driver = new EdgeDriver(Path.Combine(cacheFolder, "edgedriver_win64", "msedgedriver.exe"), options);
+            DevToolsSession devToolsSession;
+            try
+            {
+                devToolsSession = _driver.GetDevToolsSession();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+                return;
+            }
+
             var fetch = devToolsSession
-                .GetVersionSpecificDomains<OpenQA.Selenium.DevTools.V131.DevToolsSessionDomains>().Network;
+                .GetVersionSpecificDomains<OpenQA.Selenium.DevTools.V135.DevToolsSessionDomains>().Network;
 
             _ = fetch.Enable(new EnableCommandSettings());
 
