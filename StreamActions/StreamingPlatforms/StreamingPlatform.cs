@@ -7,8 +7,6 @@ using Il2CppAssets.Scripts.Unity.UI_New.InGame;
 using Il2CppNinjaKiwi.Common.ResourceUtils;
 
 namespace StreamActions.StreamingPlatforms;
-//todo https://github.com/Agash/YTLiveChat for youtube
-
 
 public abstract class StreamingPlatform : NamedModContent
 {

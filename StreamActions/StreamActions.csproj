@@ -43,6 +43,12 @@
         <Link>ModHelperData.cs</Link>
       </Compile>
     </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="..\Icon.png">
+        <Link>Icon.png</Link>
+      </EmbeddedResource>
+    </ItemGroup>
     
     <Import Project="..\..\btd6.targets" />
 
