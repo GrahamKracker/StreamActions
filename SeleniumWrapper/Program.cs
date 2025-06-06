@@ -1,12 +1,11 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using System.IO.Compression;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using H.Formatters;
 using H.Pipes;
 using OpenQA.Selenium;
 using OpenQA.Selenium.DevTools;
-using OpenQA.Selenium.DevTools.V135.Network;
+using OpenQA.Selenium.DevTools.V137.Network;
 using OpenQA.Selenium.Edge;
 
 namespace SeleniumWrapper;
@@ -75,7 +74,7 @@ class Program
             }
 
             var fetch = devToolsSession
-                .GetVersionSpecificDomains<OpenQA.Selenium.DevTools.V135.DevToolsSessionDomains>().Network;
+                .GetVersionSpecificDomains<OpenQA.Selenium.DevTools.V137.DevToolsSessionDomains>().Network;
 
             _ = fetch.Enable(new EnableCommandSettings());
 

@@ -78,6 +78,8 @@ public class Main : BloonsTD6Mod
 
     public static void ChatMessageReceived(string chatMessage)
     {
+        if (Settings.DebugMode)
+            ModLogger.Msg("Chat message received: " + chatMessage);
         int charPos = 0;
         char cToCheck = chatMessage[0];
         if (cToCheck is not '1' and not '2' and not '3' and not '4')

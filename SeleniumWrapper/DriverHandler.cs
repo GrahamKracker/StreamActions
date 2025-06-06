@@ -15,9 +15,9 @@ public class DriverHandler
 
         var driverExecutable = Path.Combine(cacheFolder, "edgedriver_win64", "msedgedriver.exe");
 
-        var fileVersionInfo = FileVersionInfo.GetVersionInfo(driverExecutable);
+        var fileVersionInfo = File.Exists(driverExecutable) ? FileVersionInfo.GetVersionInfo(driverExecutable) : null;
 
-        if (!File.Exists(driverExecutable) || fileVersionInfo.FileVersion != json?.driverVersion.ToString())
+        if (!File.Exists(driverExecutable) || fileVersionInfo?.FileVersion != json?.driverVersion.ToString())
         {
             if(json == null)
                 throw new InvalidOperationException("Failed to get driver version from github");

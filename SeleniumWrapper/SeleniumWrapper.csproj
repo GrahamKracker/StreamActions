@@ -14,7 +14,7 @@
     <ItemGroup>
         <PackageReference Include="H.Formatters.Newtonsoft.Json" Version="15.0.0" />
         <PackageReference Include="H.Pipes" Version="15.0.0" />
-        <PackageReference Include="Selenium.Support" Version="4.31.0" />
-        <PackageReference Include="Selenium.WebDriver" Version="4.31.0" />
+        <PackageReference Include="Selenium.Support" Version="4.33.0" />
+        <PackageReference Include="Selenium.WebDriver" Version="4.33.0" />
     </ItemGroup>
 </Project>

@@ -24,4 +24,10 @@ public class Settings : ModSettings
         displayName = nameof(PausePollsOnGamePause).Spaced(),
         description = "Whether to pause the poll countdown when the game is paused.",
     };
+
+    public static ModSettingBool DebugMode { get; } = new(false)
+    {
+        displayName = nameof(DebugMode).Spaced(),
+        description = "Enable this to log each chat message that is received from the active streaming platform, not just ones that count for votes.",
+    };
 }

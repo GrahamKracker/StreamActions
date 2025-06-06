@@ -24,7 +24,7 @@
         <PackageReference Include="H.Formatters.Newtonsoft.Json" Version="15.0.0" />
         <PackageReference Include="H.Pipes" Version="15.0.0" />
         <PackageReference Include="TwitchLib.Client" Version="3.3.1" />
-        <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.40">
+        <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.43">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

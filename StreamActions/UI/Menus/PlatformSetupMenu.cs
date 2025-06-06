@@ -83,11 +83,18 @@ public class PlatformSetupMenu : ModGameMenu<ExtraSettingsScreen>
 
     private void ConnectToPlatform(StreamingPlatform platform)
     {
-        StreamingPlatform.CurrentPlatform?.Disconnect();
+        var currentPlatform = StreamingPlatform.CurrentPlatform;
+        if (currentPlatform != null)
+        {
+            ModLogger.Msg($"Disconnecting from {currentPlatform.DisplayName}...");
+            currentPlatform.Disconnect();
+        }
 
+        ModLogger.Msg($"Connecting to {platform.DisplayName}...");
         StreamingPlatform.CurrentPlatform = platform;
 
         platform.ConnectToPlatform();
+        ModLogger.Msg($"Connected to {platform.DisplayName}.");
     }
 
     private void CreateRightMenu(ModHelperPanel modPanel)
