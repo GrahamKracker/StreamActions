@@ -1,1 +1,1 @@
-Updated for v48. Added a remote version detection for the edge driver.
+fix an oversight in the driver downloader, add a debug mode to log messages. update to latest ms edge version
